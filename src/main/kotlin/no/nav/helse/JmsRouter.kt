@@ -14,6 +14,7 @@ import io.prometheus.client.Summary
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
+import kotlinx.serialization.serializer
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,8 +65,8 @@ inline fun readFile(path: Path): String = Files.readAllBytes(path).toString(Char
 fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, "main-context")) {
     val applicationState = ApplicationState()
 
-    val credentials: Credentials = JSON.parse(readFile(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
-    val config: Config = JSON.parse(readFile(Paths.get("config.json")))
+    val credentials: Credentials = JSON.parse(Credentials::class.serializer(), readFile(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
+    val config: Config = JSON.parse(Config::class.serializer(), readFile(Paths.get("config.json")))
 
     val connection = createQueueConnection(config, credentials)
 
