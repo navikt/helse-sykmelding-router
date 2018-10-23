@@ -59,13 +59,13 @@ data class QueueRoute(
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
-inline fun <reified T : Any> loadConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
+inline fun readFile(path: Path): String = Files.readAllBytes(path).toString(Charsets.UTF_8)
 
 fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, "main-context")) {
     val applicationState = ApplicationState()
 
-    val credentials: Credentials = loadConfig(Paths.get("/var/run/secrets/nais.io/vault/credentials.json"))
-    val config: Config = loadConfig(Paths.get("config.json"))
+    val credentials: Credentials = JSON.parse(readFile(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
+    val config: Config = JSON.parse(readFile(Paths.get("config.json")))
 
     val connection = createQueueConnection(config, credentials)
 
