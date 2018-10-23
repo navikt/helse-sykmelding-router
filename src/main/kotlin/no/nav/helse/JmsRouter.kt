@@ -108,7 +108,7 @@ suspend fun routeMessages(applicationState: ApplicationState, input: MessageCons
             delay(100)
         } else {
             FULL_ROUTE_SUMMARY.labels(inputMessage.jmsDestination.name()).startTimer().use {
-                log.debug("Received message from {}, routing to {}",
+                log.info("Received message from {}, routing to {}",
                     keyValue("inputQueue", inputMessage.jmsDestination.name()),
                     keyValue("outputQueues", output.joinToString(", ") { q -> q.destination.name() }))
                 output.forEach { output -> output.send(inputMessage) }

@@ -19,6 +19,7 @@ version = "1.0-SNAPSHOT"
 application.mainClassName = "no.nav.helse.JmsRouterKt"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
 
