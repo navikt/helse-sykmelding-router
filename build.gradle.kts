@@ -10,7 +10,7 @@ val prometheusVersion = "0.5.0"
 val serializationVersion = "0.8.3-rc13"
 
 plugins {
-    kotlin("jvm") version "1.3.0-rc-146"
+    kotlin("jvm") version "1.3.0-rc-190"
     application
 }
 

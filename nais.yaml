@@ -28,7 +28,7 @@ resources:
     memory: 128Mi
 fasitResources:
   used:
-  - alias: syfosmmottak_tmp_routed_input
+  - alias: syfomottak_input_queue
     resourceType: Queue
   - alias: eia_queue_mottak_inbound
     resourceType: Queue
