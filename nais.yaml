@@ -8,13 +8,13 @@ port: 8080
 healthcheck:
   liveness:
     path: /is_alive
-    initialDelay: 10
+    initialDelay: 5
     timeout: 1
     periodSeconds: 10
     failureThreshold: 3
   readiness:
     path: /is_ready
-    initialDelay: 10
+    initialDelay: 5
     timeout: 1
 prometheus:
   enabled: true
@@ -26,6 +26,7 @@ resources:
   requests:
     cpu: 50m
     memory: 128Mi
+secrets: true
 fasitResources:
   used:
   - alias: syfomottak_input_queue
