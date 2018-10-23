@@ -1,0 +1,15 @@
+{
+  "mqHost": "b27apvl171.preprod.local",
+  "mqPort": "1413",
+  "mqQueueManager": "MQXLSC02",
+  "mqChannel": "Q1_SYFOMOTTAK",
+  "routes": [
+    {
+      "inputQueue": "QA.Q1_SYFOMOTTAK.INPUT",
+      "outputQueues": [
+        "QA.Q414.FS06_EIA_MELDINGER",
+        "QA.Q1_SYFOSMMOTTAK.TMP_ROUTED_INPUT"
+      ]
+    }
+  ]
+}

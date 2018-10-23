@@ -1,0 +1,36 @@
+name: "helse-sykmelding-router"
+image: "repo.adeo.no:5443/helse/helse-sykmelding-router"
+replicas:
+  min: 1
+  max: 2
+  cpuThresholdPercentage: 90
+port: 8080
+healthcheck:
+  liveness:
+    path: /is_alive
+    initialDelay: 10
+    timeout: 1
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /is_ready
+    initialDelay: 10
+    timeout: 1
+prometheus:
+  enabled: true
+  path: /prometheus
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+fasitResources:
+  used:
+  - alias: syfosmmottak_tmp_routed_input
+    resourceType: Queue
+  - alias: eia_queue_mottak_inbound
+    resourceType: Queue
+  - alias: syfosmmottak_tmp_routed_input
+    resourceType: Queue
