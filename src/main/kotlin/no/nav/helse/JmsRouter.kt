@@ -78,9 +78,12 @@ fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, 
 
     applicationState.ready = true
 
-    while (applicationState.running) {
-        if (listeners.flatten().any { !it.isActive && it.isCancelled && it.isCompleted }) {
-            applicationState.running = false
+    runBlocking {
+        while (applicationState.running) {
+            if (listeners.flatten().any { !it.isActive && it.isCancelled && it.isCompleted }) {
+                applicationState.running = false
+            }
+            delay(100)
         }
     }
 
