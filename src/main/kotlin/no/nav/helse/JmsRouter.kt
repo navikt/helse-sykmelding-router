@@ -71,16 +71,20 @@ fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, 
     val config: Config = readConfig(Paths.get("config.json"))
 
     val connection = createQueueConnection(config, credentials)
+    log.info("Connection estabilished towards MQ broker")
 
     val listeners = createListeners(applicationState, connection, config.routes)
+    log.info("Listeners created")
 
     val ktorServer = createHttpServer(applicationState)
 
     applicationState.ready = true
+    log.info("Application marked as ready to accept traffic")
 
     runBlocking {
         while (applicationState.running) {
-            if (listeners.flatten().any { !it.isActive && it.isCancelled && it.isCompleted }) {
+            if (listeners.flatten().any { !it.isActive || it.isCancelled || it.isCompleted }) {
+                log.error("One coroutine seems to have died, shutting down.")
                 applicationState.running = false
             }
             delay(100)
@@ -102,6 +106,9 @@ suspend fun CoroutineScope.createListeners(
             val outputs = qmRoute.outputQueues.map { outputQueue ->
                 session.createProducer(session.createQueue(outputQueue))
             }
+            log.info("Route initialized for {} -> {}",
+                keyValue("inputQueue", qmRoute.inputQueue),
+                keyValue("outputQueues", qmRoute.outputQueues.joinToString(", ")))
             routeMessages(applicationState, input, outputs)
         }
     }
