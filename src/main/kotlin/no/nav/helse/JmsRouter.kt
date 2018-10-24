@@ -73,7 +73,11 @@ fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, 
     val connection = createQueueConnection(config, credentials)
     log.info("Connection estabilished towards MQ broker")
 
-    val listeners = createListeners(applicationState, connection, config.routes)
+    val listenerExceptionHandler = CoroutineExceptionHandler { ctx, e ->
+        log.error("Exception caught in coroutine {}", keyValue("context", ctx), e)
+    }
+
+    val listeners = createListeners(applicationState, connection, config.routes, listenerExceptionHandler)
     log.info("Listeners created")
 
     val ktorServer = createHttpServer(applicationState)
@@ -97,10 +101,11 @@ fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, 
 suspend fun CoroutineScope.createListeners(
     applicationState: ApplicationState,
     connection: Connection,
-    queueRoutes: List<QueueRoute>
+    queueRoutes: List<QueueRoute>,
+    exceptionHandler: CoroutineExceptionHandler
 ) = queueRoutes.map { qmRoute ->
     (1..qmRoute.coroutineCount).map {
-        launch {
+        launch(exceptionHandler) {
             val session = connection.createSession()
             val input = session.createConsumer(session.createQueue(qmRoute.inputQueue))
             val outputs = qmRoute.outputQueues.map { outputQueue ->
