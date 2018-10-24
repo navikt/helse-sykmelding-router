@@ -140,7 +140,7 @@ suspend fun routeMessages(applicationState: ApplicationState, input: MessageCons
 
 fun Destination.name(): String = if (this is Queue) { queueName } else { toString() }
 
-suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServer(CIO, 8090) {
+suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServer(CIO, 8080) {
     routing {
         get("/is_alive") {
             if (applicationState.running) {
