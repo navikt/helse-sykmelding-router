@@ -6,6 +6,7 @@ import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl
 import org.apache.activemq.artemis.core.server.ActiveMQServers
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.nio.file.Paths
 import javax.jms.*
 import javax.naming.InitialContext
 import kotlin.random.Random
@@ -155,6 +156,12 @@ object JmsRouterSpek : Spek({
             messagesRoute2.count { input ->
                 resultsRoute2.count { output -> input == output } >= 1
             } shouldEqual 10000
+        }
+    }
+
+    describe("Test can deserialize configuration") {
+        it("Valid JSON should parse fine") {
+            println(readConfig<Config>(Paths.get("config.json")))
         }
     }
 })

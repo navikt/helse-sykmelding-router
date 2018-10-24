@@ -12,6 +12,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.prometheus.client.Summary
 import kotlinx.coroutines.*
+import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
 import kotlinx.serialization.serializer
@@ -55,22 +56,23 @@ data class Config(
 data class QueueRoute(
     val inputQueue: String,
     val outputQueues: List<String>,
+    @Optional
     val coroutineCount: Int = 4
 )
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
-inline fun readFile(path: Path): String = Files.readAllBytes(path).toString(Charsets.UTF_8)
+inline fun <reified T : Any> readConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
 
 fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, "main-context")) {
     val applicationState = ApplicationState()
 
-    val credentials: Credentials = JSON.parse(Credentials::class.serializer(), readFile(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
-    val config: Config = JSON.parse(Config::class.serializer(), readFile(Paths.get("config.json")))
+    val credentials: Credentials = readConfig(Paths.get("/var/run/secrets/nais.io/vault/credentials.json"))
+    val config: Config = readConfig(Paths.get("config.json"))
 
     val connection = createQueueConnection(config, credentials)
 
-    val listeners = createListeners(applicationState, connection, config.routes)
+    val listeners = createListeners(applicationState, connection, listOf())//config.routes)
 
     val ktorServer = createHttpServer(applicationState)
 
