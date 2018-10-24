@@ -4,22 +4,24 @@ import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.jms.JmsFactoryFactory
 import com.ibm.msg.client.wmq.WMQConstants
 import io.ktor.application.call
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
+import io.ktor.response.respondTextWriter
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Summary
+import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.*
 import kotlinx.serialization.Optional
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JSON
-import kotlinx.serialization.serializer
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -63,6 +65,7 @@ data class QueueRoute(
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
 inline fun <reified T : Any> readConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
+private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
 fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, "main-context")) {
     val applicationState = ApplicationState()
@@ -137,7 +140,7 @@ suspend fun routeMessages(applicationState: ApplicationState, input: MessageCons
 
 fun Destination.name(): String = if (this is Queue) { queueName } else { toString() }
 
-suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServer(CIO) {
+suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServer(CIO, 8090) {
     routing {
         get("/is_alive") {
             if (applicationState.running) {
@@ -151,6 +154,12 @@ suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServe
                 call.respondText("I'm ready!", status = HttpStatusCode.OK)
             } else {
                 call.respondText("Please wait, I'm not ready!", status = HttpStatusCode.InternalServerError)
+            }
+        }
+        get("/prometheus") {
+            val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
+            call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
+                TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
             }
         }
     }

@@ -16,6 +16,7 @@ healthcheck:
     path: /is_ready
     initialDelay: 5
     timeout: 1
+    periodSeconds: 10
 prometheus:
   enabled: true
   path: /prometheus
