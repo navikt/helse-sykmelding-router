@@ -1,7 +1,7 @@
 {
-  "mqHost": "b27apvl171.preprod.local",
+  "mqHost": "b27apvl173.preprod.local",
   "mqPort": "1413",
-  "mqQueueManager": "MQXLSC02",
+  "mqQueueManager": "MQ1LSC03",
   "mqChannel": "Q1_SYFOMOTTAK",
   "routes": [
     {
