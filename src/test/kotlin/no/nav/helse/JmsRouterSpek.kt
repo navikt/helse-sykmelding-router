@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import kotlinx.coroutines.*
+import net.logstash.logback.argument.StructuredArguments
 import org.amshove.kluent.shouldEqual
 import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl
 import org.apache.activemq.artemis.core.server.ActiveMQServers
@@ -24,6 +25,9 @@ object JmsRouterSpek : Spek({
     val queueConnection = connectionFactory.createConnection()
     queueConnection.start()
     val session = queueConnection.createSession()
+    val exceptionHandler = CoroutineExceptionHandler { ctx, e ->
+        log.error("Exception caught in coroutine {}", StructuredArguments.keyValue("context", ctx), e)
+    }
 
     describe("A route with one input and two outputs") {
         val queueRoute = QueueRoute(
@@ -38,7 +42,7 @@ object JmsRouterSpek : Spek({
 
         val applicationState = ApplicationState()
         val route = GlobalScope.launch(newSingleThreadContext("test-thread-context")) {
-            createListeners(applicationState, queueConnection, listOf(queueRoute)).flatten().forEach { it.join() }
+            createListeners(applicationState, queueConnection, listOf(queueRoute), exceptionHandler).flatten().forEach { it.join() }
         }
 
         afterGroup {
@@ -74,7 +78,7 @@ object JmsRouterSpek : Spek({
 
         val applicationState = ApplicationState()
         val route = GlobalScope.launch(newSingleThreadContext("test-thread-context")) {
-            createListeners(applicationState, queueConnection, queueRoutes).flatten().forEach { it.join() }
+            createListeners(applicationState, queueConnection, queueRoutes, exceptionHandler).flatten().forEach { it.join() }
         }
 
         val (route1Producer, route2Producer) = queueRoutes.map {
