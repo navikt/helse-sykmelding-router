@@ -72,7 +72,7 @@ fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, 
 
     val connection = createQueueConnection(config, credentials)
 
-    val listeners = createListeners(applicationState, connection, listOf())//config.routes)
+    val listeners = createListeners(applicationState, connection, config.routes)
 
     val ktorServer = createHttpServer(applicationState)
 
