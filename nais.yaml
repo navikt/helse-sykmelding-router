@@ -1,5 +1,6 @@
 name: "helse-sykmelding-router"
 image: "repo.adeo.no:5443/helse/helse-sykmelding-router"
+team: teamsykefravr
 replicas:
   min: 1
   max: 2
