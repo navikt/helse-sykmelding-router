@@ -31,9 +31,9 @@ resources:
 secrets: true
 fasitResources:
   used:
-  - alias: syfomottak_input_queue
+  - alias: syfosmmottak_input_queue
     resourceType: Queue
   - alias: eia_queue_mottak_inbound
     resourceType: Queue
-  - alias: syfosmmottak_tmp_routed_input
+  - alias: syfosmmottak_temp_routed_input
     resourceType: Queue
