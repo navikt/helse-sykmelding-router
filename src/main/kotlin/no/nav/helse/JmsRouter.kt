@@ -67,13 +67,14 @@ data class ApplicationState(var running: Boolean = true, var ready: Boolean = fa
 inline fun <reified T : Any> readConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
 private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
-fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(10, "main-context")) {
+fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(2, "main-context")) {
     val applicationState = ApplicationState()
 
     val credentials: Credentials = readConfig(Paths.get("/var/run/secrets/nais.io/vault/credentials.json"))
     val config: Config = readConfig(Paths.get("config.json"))
 
     val connection = createQueueConnection(config, credentials)
+    connection.start()
     log.info("Connection estabilished towards MQ broker")
 
     val listenerExceptionHandler = CoroutineExceptionHandler { ctx, e ->
