@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val artemisVersion = "2.6.2"
 val ibmMqVersion = "9.1.0.0"
-val ktorVersion = "1.0.0-beta-1"
+val ktorVersion = "1.0.0"
 val logbackVersion = "1.3.0-alpha4"
 val logstashLogbackEncoderVersion = "5.2"
 val spekVersion = "2.0.0-rc.1"
@@ -12,12 +12,15 @@ val serializationVersion = "0.8.3-rc13"
 plugins {
     kotlin("jvm") version "1.3.0-rc-190"
     id("kotlinx-serialization") version "1.3.0-rc-190"
-    application
+    id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
 group = "no.nav.helse"
 version = "1.0-SNAPSHOT"
-application.mainClassName = "no.nav.helse.JmsRouterKt"
+
+tasks.withType<Jar> {
+    manifest.attributes["Main-Class"] = "no.nav.helse.JmsRouterKt"
+}
 
 repositories {
     mavenLocal()

@@ -13,8 +13,8 @@ This is a application for routing a message from one to multiple queues
 
 ### Building the application
 #### Compile and package application
-To build locally and run the integration tests you can simply run `./gradlew installDist` or on windows 
-`gradlew.bat installDist`
+To build locally and run the integration tests you can simply run `./gradlew shadowJar` or on windows 
+`gradlew.bat shadowJar`
 
 #### Creating a docker image
 Creating a docker image should be as simple as `docker build -t helse-sykmelding-router .`
