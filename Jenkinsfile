@@ -8,7 +8,7 @@ pipeline {
         DISABLE_SLACK_MESSAGES = true
         ZONE = 'fss'
         DOCKER_SLUG='helse'
-        FASIT_ENVIRONMENT='q1'
+        KUBECONFIG="kubeconfig-teamsykefravr"
     }
 
     stages {
