@@ -6,7 +6,7 @@ metadata:
   labels:
     team: "teamsykefravr"
 spec:
-  image: "repo.adeo.no:5443/helse/helse-sykmelding-router"
+  image: "repo.adeo.no:5443/helse/helse-sykmelding-router:@@VERSION@@"
   team: teamsykefravr
   replicas:
     min: 1
