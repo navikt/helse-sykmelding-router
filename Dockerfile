@@ -1,7 +1,6 @@
 FROM navikt/java:11
 
-COPY config.json .
+COPY config-preprod.json .
+COPY config-prod.json .
 COPY build/libs/helse-sykmelding-router-*-all.jar app.jar
-COPY build/install/helse-sykmelding-router/bin/helse-sykmelding-router bin/app
-COPY build/install/helse-sykmelding-router/lib lib/
 ENV JAVA_OPTS="-XshowSettings:vm -Dlogback.configurationFile=logback-remote.xml -XX:MaxRAMPercentage=75"

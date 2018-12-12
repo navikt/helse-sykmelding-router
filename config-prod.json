@@ -1,0 +1,15 @@
+{
+  "mqHost": "QA.P414.FS06_EIA_MELDINGER",
+  "mqPort": "1414",
+  "mqQueueManager": "MPLSC04",
+  "mqChannel": "Q1_SYFOSMMOTTAK",
+  "routes": [
+    {
+      "inputQueue": "QA.P_SYFOSMMOTTAK.INPUT",
+      "outputQueues": [
+        "QA.P414.FS06_EIA_MELDINGER",
+        "QA.P_SYFOSMMOTTAK.TEMP_ROUTED_INPUT"
+      ]
+    }
+  ]
+}

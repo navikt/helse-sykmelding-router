@@ -42,9 +42,14 @@ pipeline {
         stage('deploy') {
             steps {
                 dockerUtils action: 'createPushImage'
-                nais action: 'validate'
-                nais action: 'upload'
-                deployApp action: 'jiraPreprod'
+                deployApp action: 'kubectlDeploy', cluster: 'preprod-fss'
+            }
+        }
+        stage('deploy to production') {
+            when { environment name: 'DEPLOY_TO', value: 'production' }
+
+            steps {
+                deployApp action: 'kubectlDeploy', cluster: 'prod-fss'
             }
         }
     }

@@ -22,9 +22,11 @@ import kotlinx.serialization.json.JSON
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.jms.*
 
@@ -67,11 +69,12 @@ data class ApplicationState(var running: Boolean = true, var ready: Boolean = fa
 inline fun <reified T : Any> readConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
 private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
-fun main(args: Array<String>) = runBlocking<Unit>(newFixedThreadPoolContext(2, "main-context")) {
+fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val applicationState = ApplicationState()
 
     val credentials: Credentials = readConfig(Paths.get("/var/run/secrets/nais.io/vault/credentials.json"))
-    val config: Config = readConfig(Paths.get("config.json"))
+    val configPath = System.getenv("CONFIG_FILE") ?: throw RuntimeException("Missing env variable CONFIG_FILE")
+    val config: Config = readConfig(Paths.get(configPath))
 
     val connection = createQueueConnection(config, credentials)
     connection.start()
