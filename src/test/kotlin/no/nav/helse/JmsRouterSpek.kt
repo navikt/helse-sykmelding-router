@@ -165,7 +165,7 @@ object JmsRouterSpek : Spek({
 
     describe("Test can deserialize configuration") {
         it("Valid JSON should parse fine") {
-            println(readConfig<Config>(Paths.get("config.json")))
+            println(readConfig<Config>(Paths.get("config-prod.json")))
         }
     }
 })
