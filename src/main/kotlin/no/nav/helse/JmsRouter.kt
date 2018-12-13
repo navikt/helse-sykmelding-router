@@ -28,7 +28,11 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.jms.*
+import javax.jms.Connection
+import javax.jms.Destination
+import javax.jms.MessageConsumer
+import javax.jms.MessageProducer
+import javax.jms.Queue
 
 const val NAMESPACE: String = "sykmelding_router"
 
