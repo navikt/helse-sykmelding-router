@@ -2,7 +2,7 @@
   "mqHost": "a01apvl064.adeo.no",
   "mqPort": "1414",
   "mqQueueManager": "MPLSC04",
-  "mqChannel": "Q1_SYFOSMMOTTAK",
+  "mqChannel": "P_SYFOSMMOTTAK",
   "routes": [
     {
       "inputQueue": "QA.P_SYFOSMMOTTAK.INPUT",
