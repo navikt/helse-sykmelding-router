@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "no.nav.helse"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.helse.JmsRouterKt"

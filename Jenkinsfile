@@ -49,7 +49,7 @@ pipeline {
             when { environment name: 'DEPLOY_TO', value: 'production' }
 
             steps {
-                deployApp action: 'kubectlDeploy', cluster: 'prod-fss'
+                deployApp action: 'kubectlDeploy', cluster: 'prod-fss', file: 'naiserator-prod.yaml'
             }
         }
     }
