@@ -18,7 +18,10 @@ pipeline {
                     init action: 'default'
                     sh './gradlew clean'
                     applicationVersionGradle = sh(script: './gradlew -q printVersion', returnStdout: true).trim()
-                    env.APPLICATION_VERSION = "${applicationVersionGradle}.${env.BUILD_ID}-${env.COMMIT_HASH_SHORT}"
+                    if (!applicationVersionGradle.endsWith('-SNAPSHOT')) {
+                        env.DEPLOY_TO = 'production'
+                    }
+                    env.APPLICATION_VERSION = "${applicationVersionGradle}-${env.COMMIT_HASH_SHORT}"
                     init action: 'updateStatus'
                 }
             }
