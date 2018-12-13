@@ -135,8 +135,8 @@ object JmsRouterSpek : Spek({
             }
 
             val messagesWarmup = messages.take(200)
-            val messagesRoute1 = messages.take(10000)
-            val messagesRoute2 = messages.take(10000)
+            val messagesRoute1 = messages.take(5000)
+            val messagesRoute2 = messages.take(5000)
 
             messagesWarmup.forEach { route1Producer.send(session.createTextMessage(it)) }
             route1Consumers.forEach { c -> repeat(400) { c.receiveWaitOnNull(5) } }
@@ -147,8 +147,8 @@ object JmsRouterSpek : Spek({
             messagesRoute1.forEach { route1Producer.send(session.createTextMessage(it)) }
             messagesRoute2.forEach { route2Producer.send(session.createTextMessage(it)) }
 
-            val receivedRoute1 = route1Consumers.flatMap { q -> (1..11000).mapNotNull { q.receiveWaitOnNull(5) } }
-            val receivedRoute2 = route2Consumers.flatMap { q -> (1..11000).mapNotNull { q.receiveWaitOnNull(5) } }
+            val receivedRoute1 = route1Consumers.flatMap { q -> (1..6000).mapNotNull { q.receiveWaitOnNull(5) } }
+            val receivedRoute2 = route2Consumers.flatMap { q -> (1..6000).mapNotNull { q.receiveWaitOnNull(5) } }
 
             println("Performance testing took ${System.currentTimeMillis() - startTime} ms")
             val resultsRoute1 = receivedRoute1.map { (it as TextMessage).text }
@@ -156,10 +156,10 @@ object JmsRouterSpek : Spek({
 
             messagesRoute1.count { input ->
                 resultsRoute1.count { output -> input == output } >= 3
-            } shouldEqual 10000
+            } shouldEqual 5000
             messagesRoute2.count { input ->
                 resultsRoute2.count { output -> input == output } >= 1
-            } shouldEqual 10000
+            } shouldEqual 5000
         }
     }
 
