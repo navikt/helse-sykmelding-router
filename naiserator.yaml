@@ -13,18 +13,17 @@ spec:
     max: 2
     cpuThresholdPercentage: 90
   port: 8080
-  healthcheck:
-    liveness:
-      path: /is_alive
-      initialDelay: 5
-      timeout: 1
-      periodSeconds: 10
-      failureThreshold: 3
-    readiness:
-      path: /is_ready
-      initialDelay: 5
-      timeout: 1
-      periodSeconds: 10
+  liveness:
+    path: /is_alive
+    initialDelay: 5
+    timeout: 1
+    periodSeconds: 10
+    failureThreshold: 3
+  readiness:
+    path: /is_ready
+    initialDelay: 5
+    timeout: 1
+    periodSeconds: 10
   prometheus:
     enabled: true
     path: /prometheus
