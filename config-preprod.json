@@ -7,8 +7,8 @@
     {
       "inputQueue": "QA.Q1_SYFOSMMOTTAK.INPUT",
       "outputQueues": [
-        "QA.Q414.FS06_EIA_MELDINGER",
-        "QA.Q1_SYFOSMMOTTAK.TEMP_ROUTED_INPUT"
+        { "name": "QA.Q414.FS06_EIA_MELDINGER" },
+        { "name": "QA.Q1_SYFOSMMOTTAK.TEMP_ROUTED_INPUT", "failOnException": true}
       ]
     }
   ]

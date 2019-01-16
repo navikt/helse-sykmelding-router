@@ -53,7 +53,8 @@ dependencies {
     testImplementation("org.apache.activemq:artemis-server:$artemisVersion")
     testImplementation("org.apache.activemq:artemis-jms-client:$artemisVersion")
 
-    testImplementation("org.amshove.kluent:kluent:1.39")
+    testImplementation("org.amshove.kluent:kluent:1.45")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.0.0")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
 
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")

@@ -8,6 +8,7 @@ import org.apache.activemq.artemis.core.server.ActiveMQServers
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.nio.file.Paths
+import java.util.concurrent.Executors
 import javax.jms.*
 import javax.naming.InitialContext
 import kotlin.random.Random
@@ -20,6 +21,8 @@ object JmsRouterSpek : Spek({
         .addAcceptorConfiguration("invm", "vm://0"))
     activeMQServer.start()
 
+    val credentials = Credentials("", "")
+
     val initialContext = InitialContext()
     val connectionFactory = initialContext.lookup("ConnectionFactory") as ConnectionFactory
     val queueConnection = connectionFactory.createConnection()
@@ -29,20 +32,24 @@ object JmsRouterSpek : Spek({
         log.error("Exception caught in coroutine {}", StructuredArguments.keyValue("context", ctx), e)
     }
 
+    afterGroup {
+        activeMQServer.stop()
+    }
+
     describe("A route with one input and two outputs") {
         val queueRoute = QueueRoute(
             "input_queue",
-            listOf("output_1", "output_2")
+            listOf(QueueInfo("output_1"), QueueInfo("output_2"))
         )
         val inputQueue = session.createQueue(queueRoute.inputQueue)
-        val outputs = queueRoute.outputQueues.map { session.createQueue(it) }
+        val outputs = queueRoute.outputQueues.map { it.toProducerMeta(session) }
         val producer = session.createProducer(inputQueue)
-        val (consumer1, consumer2) = outputs.map { session.createConsumer(it) }
+        val (consumer1, consumer2) = outputs.map { session.createConsumer(session.createQueue(it.queueName)) }
 
 
         val applicationState = ApplicationState()
-        val route = GlobalScope.launch(newSingleThreadContext("test-thread-context")) {
-            createListeners(applicationState, queueConnection, listOf(queueRoute), exceptionHandler).flatten().forEach { it.join() }
+        val route = GlobalScope.launch(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+            createListeners(applicationState, connectionFactory, credentials, listOf(queueRoute), exceptionHandler).flatten().forEach { it.join() }
         }
 
         afterGroup {
@@ -53,7 +60,7 @@ object JmsRouterSpek : Spek({
             }
         }
 
-        it("TODO") {
+        it("A single route") {
             val testPayload = "This is a chicken wing"
             producer.send(session.createTextMessage(testPayload))
 
@@ -68,17 +75,17 @@ object JmsRouterSpek : Spek({
         val queueRoutes = listOf(
             QueueRoute(
                 "route_1_input",
-                listOf("route_1_queue_1", "route_2_queue_2", "route_3_queue_3")
+                listOf(QueueInfo("route_1_queue_1"), QueueInfo("route_2_queue_2"), QueueInfo("route_3_queue_3"))
             ),
             QueueRoute(
                 "route_2_input",
-                listOf("route_2_queue_1")
+                listOf(QueueInfo("route_2_queue_1"))
             )
         )
 
         val applicationState = ApplicationState()
-        val route = GlobalScope.launch(newSingleThreadContext("test-thread-context")) {
-            createListeners(applicationState, queueConnection, queueRoutes, exceptionHandler).flatten().forEach { it.join() }
+        val route = GlobalScope.launch(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+            createListeners(applicationState, connectionFactory, credentials, queueRoutes, exceptionHandler).flatten().forEach { it.join() }
         }
 
         val (route1Producer, route2Producer) = queueRoutes.map {
@@ -86,8 +93,8 @@ object JmsRouterSpek : Spek({
         }
 
         val (route1Consumers, route2Consumers) = queueRoutes.map {
-            it.outputQueues.map { name ->
-                session.createConsumer(session.createQueue(name))
+            it.outputQueues.map { queueInfo ->
+                session.createConsumer(session.createQueue(queueInfo.name))
             }
         }
 

@@ -28,11 +28,13 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.jms.Connection
+import javax.jms.ConnectionFactory
 import javax.jms.Destination
+import javax.jms.JMSContext
 import javax.jms.MessageConsumer
 import javax.jms.MessageProducer
 import javax.jms.Queue
+import javax.jms.Session
 
 const val NAMESPACE: String = "sykmelding_router"
 
@@ -63,9 +65,26 @@ data class Config(
 @Serializable
 data class QueueRoute(
     val inputQueue: String,
-    val outputQueues: List<String>,
+    val outputQueues: List<QueueInfo>,
     @Optional
     val coroutineCount: Int = 4
+)
+
+@Serializable
+data class QueueInfo(
+    val name: String,
+    @Optional
+    val failOnException: Boolean = true
+)
+
+data class ProducerMeta(
+    val producer: MessageProducer,
+    val queueName: String,
+    val failOnException: Boolean
+)
+
+fun QueueInfo.toProducerMeta(session: Session): ProducerMeta = ProducerMeta(
+    session.createProducer(session.createQueue(name)), name, failOnException
 )
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
@@ -80,15 +99,15 @@ fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2
     val configPath = System.getenv("CONFIG_FILE") ?: throw RuntimeException("Missing env variable CONFIG_FILE")
     val config: Config = readConfig(Paths.get(configPath))
 
-    val connection = createQueueConnection(config, credentials)
-    connection.start()
     log.info("Connection estabilished towards MQ broker")
 
     val listenerExceptionHandler = CoroutineExceptionHandler { ctx, e ->
         log.error("Exception caught in coroutine {}", keyValue("context", ctx), e)
     }
 
-    val listeners = createListeners(applicationState, connection, config.routes, listenerExceptionHandler)
+    val connectionFactory = createQueueConnection(config)
+
+    val listeners = createListeners(applicationState, connectionFactory, credentials, config.routes, listenerExceptionHandler)
     log.info("Listeners created")
 
     val ktorServer = createHttpServer(applicationState)
@@ -111,36 +130,64 @@ fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2
 
 suspend fun CoroutineScope.createListeners(
     applicationState: ApplicationState,
-    connection: Connection,
+    connectionFactory: ConnectionFactory,
+    credentials: Credentials,
     queueRoutes: List<QueueRoute>,
     exceptionHandler: CoroutineExceptionHandler
 ) = queueRoutes.map { qmRoute ->
     (1..qmRoute.coroutineCount).map {
         launch(exceptionHandler) {
+            val connection = connectionFactory.createConnection(credentials.mqUsername, credentials.mqPassword)
+            connection.start()
             val session = connection.createSession()
+            val inputContext = connectionFactory.createContext(credentials.mqUsername, credentials.mqPassword, JMSContext.SESSION_TRANSACTED)
             val input = session.createConsumer(session.createQueue(qmRoute.inputQueue))
-            val outputs = qmRoute.outputQueues.map { outputQueue ->
-                session.createProducer(session.createQueue(outputQueue))
-            }
+            val outputs = qmRoute.outputQueues.map { outputQueue -> outputQueue.toProducerMeta(session) }
             log.info("Route initialized for {} -> {}",
                 keyValue("inputQueue", qmRoute.inputQueue),
                 keyValue("outputQueues", qmRoute.outputQueues.joinToString(", ")))
-            routeMessages(applicationState, input, outputs)
+            routeMessages(applicationState, inputContext, input, outputs)
         }
     }
 }.toList()
 
-suspend fun routeMessages(applicationState: ApplicationState, input: MessageConsumer, output: List<MessageProducer>) {
+suspend fun routeMessages(
+    applicationState: ApplicationState,
+    inputContext: JMSContext,
+    input: MessageConsumer,
+    output: List<ProducerMeta>
+) {
     while (applicationState.running) {
         val inputMessage = input.receiveNoWait()
         if (inputMessage == null) {
             delay(100)
         } else {
             FULL_ROUTE_SUMMARY.labels(inputMessage.jmsDestination.name()).startTimer().use {
+                val inputQueueName: String = inputMessage.jmsDestination.name()
+                val outputQueueNames: String = output.joinToString(", ") { q -> q.queueName }
                 log.info("Received message from {}, routing to {}",
-                    keyValue("inputQueue", inputMessage.jmsDestination.name()),
-                    keyValue("outputQueues", output.joinToString(", ") { q -> q.destination.name() }))
-                output.forEach { output -> output.send(inputMessage) }
+                    keyValue("inputQueue", inputQueueName),
+                    keyValue("outputQueues", outputQueueNames))
+                output.forEach { output ->
+                    try {
+                        output.producer.send(inputMessage)
+                    } catch (e: Throwable) {
+                        if (output.failOnException) {
+                            log.error("Failed to route message from {} to {}, rolling back transaction",
+                                keyValue("inputQueue", inputQueueName),
+                                keyValue("outputQueue", output.queueName),
+                                e)
+                            delay(1000)
+                            inputContext.rollback()
+                            throw e
+                        }
+                        log.error("Exception caught, failed to route message from {} to {}",
+                            keyValue("inputQueue", inputQueueName),
+                            keyValue("outputQueue", output.queueName),
+                            e)
+                    }
+                }
+                inputContext.commit()
             }
         }
     }
@@ -173,7 +220,7 @@ suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServe
     }
 }.start(wait = false)
 
-fun createQueueConnection(config: Config, credentials: Credentials): Connection = JmsFactoryFactory.getInstance(JmsConstants.WMQ_PROVIDER)
+fun createQueueConnection(config: Config): ConnectionFactory = JmsFactoryFactory.getInstance(JmsConstants.WMQ_PROVIDER)
     .createConnectionFactory().apply {
         setBatchProperties(mapOf(
             WMQConstants.WMQ_CONNECTION_MODE to WMQConstants.WMQ_CM_CLIENT,
@@ -182,4 +229,4 @@ fun createQueueConnection(config: Config, credentials: Credentials): Connection 
             WMQConstants.WMQ_PORT to config.mqPort,
             WMQConstants.WMQ_CHANNEL to config.mqChannel
         ))
-    }.createConnection(credentials.mqUsername, credentials.mqPassword)
+    }
