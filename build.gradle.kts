@@ -37,7 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib-jdk8"))
     implementation("com.ibm.mq:com.ibm.mq.allclient:$ibmMqVersion")
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
