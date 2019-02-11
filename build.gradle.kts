@@ -2,21 +2,21 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val artemisVersion = "2.6.2"
 val ibmMqVersion = "9.1.0.0"
-val ktorVersion = "1.0.0"
+val ktorVersion = "1.1.2"
 val logbackVersion = "1.3.0-alpha4"
 val logstashLogbackEncoderVersion = "5.2"
-val spekVersion = "2.0.0-rc.1"
+val spekVersion = "2.0.0"
 val prometheusVersion = "0.5.0"
-val serializationVersion = "0.8.3-rc13"
+val serializationVersion = "0.10.0"
 
 plugins {
-    kotlin("jvm") version "1.3.0-rc-190"
-    id("kotlinx-serialization") version "1.3.0-rc-190"
+    kotlin("jvm") version "1.3.20"
+    id("kotlinx-serialization") version "1.3.20"
     id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
 group = "no.nav.helse"
-version = "1.0"
+version = "1.1"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.helse.JmsRouterKt"

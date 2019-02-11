@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import kotlinx.coroutines.*
+import kotlinx.serialization.ImplicitReflectionSerializer
 import net.logstash.logback.argument.StructuredArguments
 import org.amshove.kluent.shouldEqual
 import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl
@@ -13,6 +14,7 @@ import javax.jms.*
 import javax.naming.InitialContext
 import kotlin.random.Random
 
+@ImplicitReflectionSerializer
 object JmsRouterSpek : Spek({
     val activeMQServer = ActiveMQServers.newActiveMQServer(ConfigurationImpl()
         .setPersistenceEnabled(false)

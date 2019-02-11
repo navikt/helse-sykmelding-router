@@ -16,9 +16,9 @@ import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Summary
 import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.*
-import kotlinx.serialization.Optional
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 import kotlinx.serialization.json.JSON
+import kotlinx.serialization.json.Json
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -89,9 +89,11 @@ fun QueueInfo.toProducerMeta(session: Session): ProducerMeta = ProducerMeta(
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
-inline fun <reified T : Any> readConfig(path: Path): T = JSON.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
+@ImplicitReflectionSerializer
+inline fun <reified T : Any> readConfig(path: Path): T = Json.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
 private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
+@ImplicitReflectionSerializer
 fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val applicationState = ApplicationState()
 
