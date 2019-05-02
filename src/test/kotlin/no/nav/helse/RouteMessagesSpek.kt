@@ -21,8 +21,8 @@ object RouteMessagesSpek : Spek({
         val outputQueue1 = mock<MessageProducer>()
         val outputQueue2 = mock<MessageProducer>()
         val producers = listOf(
-            ProducerMeta(outputQueue1, "queue1", false),
-            ProducerMeta(outputQueue2, "queue2", true)
+            ProducerMeta(outputQueue1, QueueInfo("queue1", false)),
+            ProducerMeta(outputQueue2, QueueInfo("queue2", true))
         )
 
         val textMessage = mock<TextMessage>()

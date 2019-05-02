@@ -6,12 +6,12 @@ import net.logstash.logback.argument.StructuredArguments
 import org.amshove.kluent.shouldEqual
 import org.apache.activemq.artemis.core.config.impl.ConfigurationImpl
 import org.apache.activemq.artemis.core.server.ActiveMQServers
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import javax.jms.*
-import javax.naming.InitialContext
 import kotlin.random.Random
 
 @ImplicitReflectionSerializer
@@ -25,8 +25,7 @@ object JmsRouterSpek : Spek({
 
     val credentials = Credentials("", "")
 
-    val initialContext = InitialContext()
-    val connectionFactory = initialContext.lookup("ConnectionFactory") as ConnectionFactory
+    val connectionFactory = ActiveMQConnectionFactory("vm://0")
     val queueConnection = connectionFactory.createConnection()
     queueConnection.start()
     val session = queueConnection.createSession()
@@ -46,7 +45,7 @@ object JmsRouterSpek : Spek({
         val inputQueue = session.createQueue(queueRoute.inputQueue)
         val outputs = queueRoute.outputQueues.map { it.toProducerMeta(session) }
         val producer = session.createProducer(inputQueue)
-        val (consumer1, consumer2) = outputs.map { session.createConsumer(session.createQueue(it.queueName)) }
+        val (consumer1, consumer2) = outputs.map { session.createConsumer(session.createQueue(it.queueInfo.name)) }
 
 
         val applicationState = ApplicationState()

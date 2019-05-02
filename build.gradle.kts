@@ -5,18 +5,18 @@ val ibmMqVersion = "9.1.0.0"
 val ktorVersion = "1.1.2"
 val logbackVersion = "1.3.0-alpha4"
 val logstashLogbackEncoderVersion = "5.2"
-val spekVersion = "2.0.0"
+val spekVersion = "2.0.2"
 val prometheusVersion = "0.5.0"
 val serializationVersion = "0.10.0"
 
 plugins {
-    kotlin("jvm") version "1.3.20"
-    id("kotlinx-serialization") version "1.3.20"
+    kotlin("jvm") version "1.3.30"
+    id("kotlinx-serialization") version "1.3.30"
     id("com.github.johnrengelman.shadow") version "4.0.3"
 }
 
 group = "no.nav.helse"
-version = "1.1"
+version = "1.1-SNAPSHOT"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.helse.JmsRouterKt"

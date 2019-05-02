@@ -17,24 +17,21 @@ import io.prometheus.client.Summary
 import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.*
 import kotlinx.serialization.*
-import kotlinx.serialization.json.JSON
 import kotlinx.serialization.json.Json
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.xml.sax.InputSource
+import java.io.StringReader
 import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.jms.ConnectionFactory
-import javax.jms.Destination
-import javax.jms.JMSContext
-import javax.jms.MessageConsumer
-import javax.jms.MessageProducer
-import javax.jms.Queue
-import javax.jms.Session
+import javax.jms.*
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPathFactory
 
 const val NAMESPACE: String = "sykmelding_router"
 
@@ -74,17 +71,31 @@ data class QueueRoute(
 data class QueueInfo(
     val name: String,
     @Optional
-    val failOnException: Boolean = true
+    val failOnException: Boolean = true,
+    @Optional
+    val behavior: QueueBehavior = QueueBehavior.ALL,
+    val matcher: QueueMatcher? = null
 )
+
+@Serializable
+data class QueueMatcher(
+    val extractor: String,
+    val pattern: String
+)
+
+enum class QueueBehavior {
+    ALL,
+    REMAINDER,
+    MATCH
+}
 
 data class ProducerMeta(
     val producer: MessageProducer,
-    val queueName: String,
-    val failOnException: Boolean
+    val queueInfo: QueueInfo
 )
 
 fun QueueInfo.toProducerMeta(session: Session): ProducerMeta = ProducerMeta(
-    session.createProducer(session.createQueue(name)), name, failOnException
+    session.createProducer(session.createQueue(name)), this
 )
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
@@ -92,9 +103,11 @@ data class ApplicationState(var running: Boolean = true, var ready: Boolean = fa
 @ImplicitReflectionSerializer
 inline fun <reified T : Any> readConfig(path: Path): T = Json.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
 private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+val coroutineContext = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
+val coroutineScope = CoroutineScope(coroutineContext)
 
 @ImplicitReflectionSerializer
-fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
+fun main() = runBlocking<Unit>(coroutineContext) {
     val applicationState = ApplicationState()
 
     val credentials: Credentials = readConfig(Paths.get("/var/run/secrets/nais.io/vault/credentials.json"))
@@ -130,7 +143,7 @@ fun main(args: Array<String>) = runBlocking<Unit>(Executors.newFixedThreadPool(2
     ktorServer.stop(10, 10, TimeUnit.SECONDS)
 }
 
-suspend fun CoroutineScope.createListeners(
+suspend fun createListeners(
     applicationState: ApplicationState,
     connectionFactory: ConnectionFactory,
     credentials: Credentials,
@@ -138,7 +151,7 @@ suspend fun CoroutineScope.createListeners(
     exceptionHandler: CoroutineExceptionHandler
 ) = queueRoutes.map { qmRoute ->
     (1..qmRoute.coroutineCount).map {
-        launch(exceptionHandler) {
+        coroutineScope.launch(exceptionHandler) {
             val connection = connectionFactory.createConnection(credentials.mqUsername, credentials.mqPassword)
             connection.start()
             val session = connection.createSession()
@@ -159,39 +172,72 @@ suspend fun routeMessages(
     input: MessageConsumer,
     output: List<ProducerMeta>
 ) {
+    val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+
     while (applicationState.running) {
         val inputMessage = input.receiveNoWait()
         if (inputMessage == null) {
             delay(100)
         } else {
+            val inputQueueName: String = inputMessage.jmsDestination.name()
+
+            suspend fun List<ProducerMeta>.send(message: Message, logMessage: String) {
+                log.info(logMessage,
+                    keyValue("inputQueue", inputQueueName),
+                    keyValue("outputQueues", joinToString(", ") { q -> q.queueInfo.name }))
+
+                forEach {
+                    it.send(message, inputContext, inputQueueName)
+                }
+            }
+
             FULL_ROUTE_SUMMARY.labels(inputMessage.jmsDestination.name()).startTimer().use {
-                val inputQueueName: String = inputMessage.jmsDestination.name()
-                val outputQueueNames: String = output.joinToString(", ") { q -> q.queueName }
                 log.info("Received message from {}, routing to {}",
                     keyValue("inputQueue", inputQueueName),
-                    keyValue("outputQueues", outputQueueNames))
-                output.forEach { output ->
-                    try {
-                        output.producer.send(inputMessage)
-                    } catch (e: Throwable) {
-                        if (output.failOnException) {
-                            log.error("Failed to route message from {} to {}, rolling back transaction",
-                                keyValue("inputQueue", inputQueueName),
-                                keyValue("outputQueue", output.queueName),
-                                e)
-                            delay(1000)
-                            inputContext.rollback()
-                            throw e
-                        }
-                        log.error("Exception caught, failed to route message from {} to {}",
-                            keyValue("inputQueue", inputQueueName),
-                            keyValue("outputQueue", output.queueName),
-                            e)
-                    }
+                    keyValue("outputQueues", output.joinToString(", ") { q -> q.queueInfo.name }))
+                val matches = try {
+                    val xPathFactory = XPathFactory.newInstance()
+                    val document = documentBuilder.parse(InputSource(StringReader((inputMessage as TextMessage).text)))
+
+                    output
+                        .filter { it.queueInfo.behavior == QueueBehavior.MATCH }
+                        .filter { xPathFactory.newXPath().evaluate(it.queueInfo.matcher!!.extractor, document).matches(Regex(it.queueInfo.matcher.pattern)) }
+                } catch (e: Exception) {
+                    log.error("Caught exception while trying to match with xpath and regex")
+                    listOf<ProducerMeta>()
                 }
+                if (matches.isEmpty()) {
+                    output.filter { it.queueInfo.behavior == QueueBehavior.REMAINDER }
+                        .send(inputMessage, "No matches found for input queue {}, routing to {}")
+                } else {
+                    matches
+                        .send(inputMessage, "Message from input queue {} was matched with output queues {}")
+                }
+                output.filter { it.queueInfo.behavior == QueueBehavior.ALL }
+                    .send(inputMessage, "Message was routed from input queue {} to output queues {}")
                 inputContext.commit()
             }
         }
+    }
+}
+
+suspend fun ProducerMeta.send(message: Message, context: JMSContext, inputQueueName: String) {
+    try {
+        producer.send(message)
+    } catch (e: Throwable) {
+        if (queueInfo.failOnException) {
+            log.error("Failed to route message from {} to {}, rolling back transaction",
+                keyValue("inputQueue", inputQueueName),
+                keyValue("outputQueue", queueInfo.name),
+                e)
+            delay(1000)
+            context.rollback()
+            throw e
+        }
+        log.error("Exception caught, failed to route message from {} to {}",
+            keyValue("inputQueue", inputQueueName),
+            keyValue("outputQueue", queueInfo.name),
+            e)
     }
 }
 

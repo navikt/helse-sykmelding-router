@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EI_fellesformat xmlns="http://www.trygdeetaten.no/xml/eiff/1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <MsgHead xmlns="http://www.kith.no/xmlstds/msghead/2006-05-24" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <MsgInfo>
+            <Type DN="Medisinsk vurdering av arbeidsmulighet ved sykdom, sykmelding" V="SYKMELD" />
+            <MIGversion>v1.2 2006-05-24</MIGversion>
+            <GenDate>2018-07-31T10:26:10</GenDate>
+            <MsgId>28e0d505-ee5b-40d7-8488-354eb25ca99d</MsgId>
+            <Ack DN="Ja" V="J" />
+            <Sender>
+                <ComMethod DN="EDI" V="EDI" />
+                <Organisation>
+                    <OrganisationName>Kule helsetjenester AS</OrganisationName>
+                    <Ident>
+                        <Id>1234634567</Id>
+                        <TypeId DN="HER-id" S="2.16.578.1.12.4.1.1.9051" V="HER" />
+                    </Ident>
+                    <Ident>
+                        <Id>223456789</Id>
+                        <TypeId DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)" S="1.16.578.1.12.3.1.1.9051" V="ENH" />
+                    </Ident>
+                    <Ident>
+                        <Id>0123</Id>
+                        <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" V="HER" S="1.23.456.7.89.1.2.3.4567.8912" />
+                    </Ident>
+                    <Address>
+                        <Type DN="Postadresse" V="PST" />
+                        <StreetAdr>TESTVEIEN 1</StreetAdr>
+                        <PostalCode>1337</PostalCode>
+                        <City>SANDVIKA</City>
+                    </Address>
+                    <HealthcareProfessional>
+                        <FamilyName>Sødal</FamilyName>
+                        <MiddleName>Fos</MiddleName>
+                        <GivenName>Ingvild</GivenName>
+                        <Ident>
+                            <Id>1234356</Id>
+                            <TypeId DN="HER-id" S="2.16.578.1.12.4.1.1.8268" V="HER" />
+                        </Ident>
+                        <Ident>
+                            <Id>12343567</Id>
+                            <TypeId DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8327" V="FNR" />
+                        </Ident>
+                        <Ident>
+                            <Id>12343568</Id>
+                            <TypeId DN="HPR-nummer" S="6.87.654.3.21.9.8.7.6543.2198" V="HPR" />
+                        </Ident>
+                        <TeleCom>
+                            <TypeTelecom DN="Arbeidsplass, direktenummer" V="WD" />
+                            <TeleAddress V="tel:33333333" />
+                        </TeleCom>
+                    </HealthcareProfessional>
+                </Organisation>
+            </Sender>
+            <Receiver>
+                <ComMethod DN="EDI" V="EDI" />
+                <Organisation>
+                    <OrganisationName>NAV IKT</OrganisationName>
+                    <Ident>
+                        <Id>1234556</Id>
+                        <TypeId DN="HER-id" S="2.16.578.1.12.4.1.1.9051" V="HER" />
+                    </Ident>
+                    <Ident>
+                        <Id>1234556</Id>
+                        <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret" S="1.23.456.7.89.1.2.3.4567.8912" V="HER" />
+                    </Ident>
+                    <Address>
+                        <Type DN="Postadresse" V="PST" />
+                        <StreetAdr>Postboks 5 St Olavs plass</StreetAdr>
+                        <PostalCode>0130</PostalCode>
+                        <City>OSLO</City>
+                    </Address>
+                </Organisation>
+            </Receiver>
+            <Patient>
+                <FamilyName>BERGHEIM</FamilyName>
+                <MiddleName>YNDESDAL</MiddleName>
+                <GivenName>DANIEL</GivenName>
+                <DateOfBirth>1989-12-12</DateOfBirth>
+                <Ident>
+                    <Id>{{FNR}}</Id>
+                    <TypeId DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8327" V="FNR" />
+                </Ident>
+                <Address>
+                    <Type DN="Postadresse" V="PST" />
+                    <StreetAdr>Oppdiktet gate 32</StreetAdr>
+                    <PostalCode>1349</PostalCode>
+                    <City>RYKKINN</City>
+                </Address>
+            </Patient>
+        </MsgInfo>
+        <Document>
+            <RefDoc>
+                <MsgType DN="XML-instans" V="XML" />
+                <Content>
+                    <HelseOpplysningerArbeidsuforhet xmlns="http://www.kith.no/xmlstds/HelseOpplysningerArbeidsuforhet/2013-10-01">
+                        <RegelSettVersjon>2</RegelSettVersjon>
+                        <SyketilfelleStartDato>2018-07-31</SyketilfelleStartDato>
+                        <Pasient>
+                            <Navn>
+                                <Etternavn>BERGHEIM</Etternavn>
+                                <Mellomnavn>YNDESDAL</Mellomnavn>
+                                <Fornavn>DANIEL</Fornavn>
+                            </Navn>
+                            <Fodselsnummer>
+                                <Id xmlns="http://www.kith.no/xmlstds/felleskomponent1">{{FNR}}</Id>
+                                <TypeId xmlns="http://www.kith.no/xmlstds/felleskomponent1" DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8116" V="FNR" />
+                            </Fodselsnummer>
+                            <NavnFastlege>Jørn Gilberg</NavnFastlege>
+                            <NAVKontor>0219</NAVKontor>
+                        </Pasient>
+                        <Arbeidsgiver>
+                            <HarArbeidsgiver DN="Én arbeidsgiver" V="1" />
+                            <NavnArbeidsgiver>Pridok As</NavnArbeidsgiver>
+                            <Yrkesbetegnelse>Test Yrke Pasient 9</Yrkesbetegnelse>
+                            <Stillingsprosent>100</Stillingsprosent>
+                        </Arbeidsgiver>
+                        <MedisinskVurdering>
+                            <HovedDiagnose>
+                                <Diagnosekode DN="Luftveissykdom IKA" S="2.16.578.1.12.4.1.1.7170" V="R99" />
+                            </HovedDiagnose>
+                        </MedisinskVurdering>
+                        <Aktivitet>
+                            <Periode>
+                                <PeriodeFOMDato>2018-07-31</PeriodeFOMDato>
+                                <PeriodeTOMDato>2018-08-04</PeriodeTOMDato>
+                                <AktivitetIkkeMulig>
+                                    <MedisinskeArsaker>
+                                        <Arsakskode DN="Helsetilstanden hindrer pasienten i å være i aktivitet" V="1" />
+                                    </MedisinskeArsaker>
+                                    <Arbeidsplassen />
+                                </AktivitetIkkeMulig>
+                            </Periode>
+                        </Aktivitet>
+                        <Prognose>
+                            <ArbeidsforEtterEndtPeriode>true</ArbeidsforEtterEndtPeriode>
+                            <ErIArbeid />
+                        </Prognose>
+                        <Tiltak />
+                        <MeldingTilNav>
+                            <BistandNAVUmiddelbart>true</BistandNAVUmiddelbart>
+                            <BeskrivBistandNAV>Test Ønsker Bistand</BeskrivBistandNAV>
+                        </MeldingTilNav>
+                        <KontaktMedPasient>
+                            <BehandletDato>2018-07-31T00:00:00+02:00</BehandletDato>
+                        </KontaktMedPasient>
+                        <Behandler>
+                            <Navn>
+                                <Etternavn>Valda</Etternavn>
+                                <Fornavn>Inga Fos</Fornavn>
+                            </Navn>
+                            <Id>
+                                <Id xmlns="http://www.kith.no/xmlstds/felleskomponent1">300631044141</Id>
+                                <TypeId xmlns="http://www.kith.no/xmlstds/felleskomponent1" DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8116" V="FNR" />
+                            </Id>
+                            <Id>
+                                <Id xmlns="http://www.kith.no/xmlstds/felleskomponent1">123456</Id>
+                                <TypeId xmlns="http://www.kith.no/xmlstds/felleskomponent1" DN="HER-id" S="2.16.578.1.12.4.1.1.8116" V="HER" />
+                            </Id>
+                            <Adresse />
+                            <KontaktInfo>
+                                <TypeTelecom xmlns="http://www.kith.no/xmlstds/felleskomponent1" DN="Hovedtelefon" V="HP" />
+                                <TeleAddress xmlns="http://www.kith.no/xmlstds/felleskomponent1" V="tel:33333333" />
+                            </KontaktInfo>
+                        </Behandler>
+                        <AvsenderSystem>
+                            <SystemNavn>Flott EPJ</SystemNavn>
+                            <SystemVersjon>1.0.0</SystemVersjon>
+                        </AvsenderSystem>
+                        <Strekkode>000210713120031072018040820160</Strekkode>
+                    </HelseOpplysningerArbeidsuforhet>
+                </Content>
+            </RefDoc>
+        </Document>
+        <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+            <SignedInfo>
+                <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+                <Reference URI="">
+                    <Transforms>
+                        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                    </Transforms>
+                    <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                    <DigestValue>QlR2pL73ef1VBxa0jRN3ECV6oi+RDGPP+8vETLlKjjU=</DigestValue>
+                </Reference>
+            </SignedInfo>
+            <SignatureValue>fdgljndfsgnjlljnfdgljndfgljnølnjcblvnxjnjlcbnjknjkbdfxnkjxcfkjnjdfnbluiseajdsjf</SignatureValue>
+            <KeyInfo>
+                <X509Data>
+                    <X509Certificate>tersjndgfnjknjkdfgnjkdfgkndfsgnjkldfgkjndgfknjnjkfdgnm,m ,xvm,fjvcxjknjnkcvxjncvxjnxcvjkncxvjnkjkncvxjkfdgjkdfgjknjn</X509Certificate>
+                </X509Data>
+            </KeyInfo>
+        </Signature>
+    </MsgHead>
+    <MottakenhetBlokk avsender="2134125125" avsenderFnrFraDigSignatur="300631044141" avsenderRef="SERIALNUMBER=2134125125, CN=TEST-Flott, OU=R&amp;D, O=Flott AS, C=NO" ebAction="Registrering" ebRole="Sykmelder" ebService="Sykmelding" ebXMLSamtaleId="deb6d7d1-139c-4885-aa22-b9362de06205" ediLoggId="1807311226joakim51343.1" herIdentifikator="" meldingsType="xml" mottattDatotid="2018-07-31T12:26:26" partnerReferanse="16524" />
+</EI_fellesformat>
