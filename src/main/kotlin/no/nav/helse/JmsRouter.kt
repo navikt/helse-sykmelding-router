@@ -18,6 +18,7 @@ import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
+import net.logstash.logback.argument.StructuredArgument
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,7 +65,8 @@ data class QueueRoute(
     val inputQueue: String,
     val outputQueues: List<QueueInfo>,
     @Optional
-    val coroutineCount: Int = 4
+    val coroutineCount: Int = 4,
+    val log: List<QueueLog> = listOf()
 )
 
 @Serializable
@@ -81,6 +83,12 @@ data class QueueInfo(
 data class QueueMatcher(
     val extractor: String,
     val pattern: String
+)
+
+@Serializable
+data class QueueLog(
+    val key: String,
+    val extractor: String
 )
 
 enum class QueueBehavior {
@@ -130,14 +138,12 @@ fun main() = runBlocking<Unit>(coroutineContext) {
     applicationState.ready = true
     log.info("Application marked as ready to accept traffic")
 
-    runBlocking {
-        while (applicationState.running) {
-            if (listeners.flatten().any { !it.isActive || it.isCancelled || it.isCompleted }) {
-                log.error("One coroutine seems to have died, shutting down.")
-                applicationState.running = false
-            }
-            delay(100)
+    while (applicationState.running) {
+        if (listeners.flatten().any { !it.isActive || it.isCancelled || it.isCompleted }) {
+            log.error("One coroutine seems to have died, shutting down.")
+            applicationState.running = false
         }
+        delay(100)
     }
 
     ktorServer.stop(10, 10, TimeUnit.SECONDS)
@@ -161,16 +167,22 @@ suspend fun createListeners(
             log.info("Route initialized for {} -> {}",
                 keyValue("inputQueue", qmRoute.inputQueue),
                 keyValue("outputQueues", qmRoute.outputQueues.joinToString(", ")))
-            routeMessages(applicationState, inputContext, input, outputs)
+            routeMessages(applicationState, inputContext, input, outputs, qmRoute)
         }
     }
 }.toList()
+
+data class XPathResult(
+    val keyValues: Array<StructuredArgument>,
+    val producerMeta: List<ProducerMeta>
+)
 
 suspend fun routeMessages(
     applicationState: ApplicationState,
     inputContext: JMSContext,
     input: MessageConsumer,
-    output: List<ProducerMeta>
+    output: List<ProducerMeta>,
+    route: QueueRoute
 ) {
     val documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 
@@ -180,32 +192,44 @@ suspend fun routeMessages(
             delay(100)
         } else {
             val inputQueueName: String = inputMessage.jmsDestination.name()
-
-            suspend fun List<ProducerMeta>.send(message: Message, logMessage: String) {
-                log.info(logMessage,
-                    keyValue("inputQueue", inputQueueName),
-                    keyValue("outputQueues", joinToString(", ") { q -> q.queueInfo.name }))
-
-                forEach {
-                    it.send(message, inputContext, inputQueueName)
-                }
-            }
-
             FULL_ROUTE_SUMMARY.labels(inputMessage.jmsDestination.name()).startTimer().use {
+
+                val (extraValuePairs, matches) = try {
+                    val xPathFactory = XPathFactory.newInstance()
+                    val document = documentBuilder.parse(InputSource(StringReader((inputMessage as TextMessage).text)))
+                    val extraValuePairs = route.log
+                        .map { keyValue(it.key, xPathFactory.newXPath().evaluate(it.extractor, document)) }
+                        .toTypedArray()
+
+                    val producerMeta = output
+                        .filter { it.queueInfo.behavior == QueueBehavior.MATCH }
+                        .filter {
+                            xPathFactory.newXPath().evaluate(it.queueInfo.matcher!!.extractor, document)
+                                .matches(Regex(it.queueInfo.matcher.pattern))
+                        }
+                    XPathResult(extraValuePairs, producerMeta)
+                } catch (e: Exception) {
+                    log.error("Caught exception while trying to match with xpath and regex")
+                    XPathResult(route.log.map { keyValue(it.key, "missing") }.toTypedArray(), listOf())
+                }
                 log.info("Received message from {}, routing to {}",
                     keyValue("inputQueue", inputQueueName),
                     keyValue("outputQueues", output.joinToString(", ") { q -> q.queueInfo.name }))
-                val matches = try {
-                    val xPathFactory = XPathFactory.newInstance()
-                    val document = documentBuilder.parse(InputSource(StringReader((inputMessage as TextMessage).text)))
+                val extraValuePairFormat = route.log.joinToString(", ", "(", ")") { "{}" }
 
-                    output
-                        .filter { it.queueInfo.behavior == QueueBehavior.MATCH }
-                        .filter { xPathFactory.newXPath().evaluate(it.queueInfo.matcher!!.extractor, document).matches(Regex(it.queueInfo.matcher.pattern)) }
-                } catch (e: Exception) {
-                    log.error("Caught exception while trying to match with xpath and regex")
-                    listOf<ProducerMeta>()
+                suspend fun List<ProducerMeta>.send(message: Message, logMessage: String) {
+                    if (isEmpty())
+                        return
+                    log.info("$logMessage $extraValuePairFormat",
+                        keyValue("inputQueue", inputQueueName),
+                        keyValue("outputQueues", joinToString(", ") { q -> q.queueInfo.name }),
+                        *extraValuePairs)
+
+                    forEach {
+                        it.send(message, inputContext, inputQueueName, extraValuePairFormat, extraValuePairs)
+                    }
                 }
+
                 if (matches.isEmpty()) {
                     output.filter { it.queueInfo.behavior == QueueBehavior.REMAINDER }
                         .send(inputMessage, "No matches found for input queue {}, routing to {}")
@@ -221,22 +245,30 @@ suspend fun routeMessages(
     }
 }
 
-suspend fun ProducerMeta.send(message: Message, context: JMSContext, inputQueueName: String) {
+suspend fun ProducerMeta.send(
+    message: Message,
+    context: JMSContext,
+    inputQueueName: String,
+    extraValuePairFormat: String,
+    extraValuePairs: Array<StructuredArgument>
+) {
     try {
         producer.send(message)
     } catch (e: Throwable) {
         if (queueInfo.failOnException) {
-            log.error("Failed to route message from {} to {}, rolling back transaction",
+            log.error("Failed to route message from {} to {}, rolling back transaction $extraValuePairFormat",
                 keyValue("inputQueue", inputQueueName),
                 keyValue("outputQueue", queueInfo.name),
+                *extraValuePairs,
                 e)
             delay(1000)
             context.rollback()
             throw e
         }
-        log.error("Exception caught, failed to route message from {} to {}",
+        log.error("Exception caught, failed to route message from {} to {} $extraValuePairFormat",
             keyValue("inputQueue", inputQueueName),
             keyValue("outputQueue", queueInfo.name),
+            *extraValuePairs,
             e)
     }
 }

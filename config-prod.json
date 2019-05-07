@@ -9,6 +9,16 @@
       "outputQueues": [
         { "name": "QA.P414.FS06_EIA_MELDINGER" },
         { "name": "QA.P_SYFOSMMOTTAK.TEMP_ROUTED_INPUT", "failOnException": false }
+      ],
+      "log": [
+        {
+          "key": "mottakId",
+          "extractor": "/EI_fellesformat/MottakenhetBlokk/@ediLoggId"
+        },
+        {
+          "key": "msgId",
+          "extractor": "/EI_fellesformat/MsgHead/MsgInfo/MsgId"
+        }
       ]
     }
   ]

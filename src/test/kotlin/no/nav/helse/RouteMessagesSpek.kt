@@ -14,6 +14,10 @@ object RouteMessagesSpek : Spek({
     val applicationState = ApplicationState()
 
     describe("Simple route") {
+        val route = QueueRoute("mock_input", listOf(
+            QueueInfo("queue1", false),
+            QueueInfo("queue2", true)
+        ))
         val inputContext = mock<JMSContext>()
         val input = mock<Queue>()
         whenever(input.getQueueName()).thenReturn("mock_input")
@@ -21,15 +25,15 @@ object RouteMessagesSpek : Spek({
         val outputQueue1 = mock<MessageProducer>()
         val outputQueue2 = mock<MessageProducer>()
         val producers = listOf(
-            ProducerMeta(outputQueue1, QueueInfo("queue1", false)),
-            ProducerMeta(outputQueue2, QueueInfo("queue2", true))
+            ProducerMeta(outputQueue1, route.outputQueues[0]),
+            ProducerMeta(outputQueue2, route.outputQueues[1])
         )
 
         val textMessage = mock<TextMessage>()
         whenever(textMessage.getJMSDestination()).thenReturn(input)
 
-        val route = GlobalScope.launch {
-            routeMessages(applicationState, inputContext, inputQueue, producers)
+        val routeListener = GlobalScope.launch {
+            routeMessages(applicationState, inputContext, inputQueue, producers, route)
         }
 
         beforeEach {
@@ -38,7 +42,7 @@ object RouteMessagesSpek : Spek({
 
         afterGroup {
             applicationState.running = false
-            runBlocking { route.join() }
+            runBlocking { routeListener.join() }
         }
 
         it("Should still route to queue2 whenever queue1 can't receive a message") {

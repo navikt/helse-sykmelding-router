@@ -18,6 +18,16 @@
           "name": "QA.Q414.FS06_EIA_MELDINGER",
           "behavior": "REMAINDER"
         }
+      ],
+      "log": [
+        {
+          "key": "mottakId",
+          "extractor": "/EI_fellesformat/MottakenhetBlokk/@ediLoggId"
+        },
+        {
+          "key": "msgId",
+          "extractor": "/EI_fellesformat/MsgHead/MsgInfo/MsgId"
+        }
       ]
     }
   ]
