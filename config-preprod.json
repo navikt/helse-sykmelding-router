@@ -8,15 +8,15 @@
       "inputQueue": "QA.Q1_SYFOSMMOTTAK.INPUT",
       "outputQueues": [
         { "name": "QA.Q1_SYFOSMMOTTAK.TEMP_ROUTED_INPUT", "failOnException": true,
-          "behavior": "ALL",
+          "behavior": "MATCH",
           "matcher": {
             "extractor": "/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/HelseOpplysningerArbeidsuforhet/Pasient/Fodselsnummer/Id",
-            "pattern": "\\d{4}(99|0[0-9])\\d{5}"
+            "pattern": "\\d{4}(99|0[0-9])\\d{4}"
           }
         },
         {
           "name": "QA.Q414.FS06_EIA_MELDINGER",
-          "behavior": "ALL"
+          "behavior": "REMAINDER"
         }
       ],
       "log": [
