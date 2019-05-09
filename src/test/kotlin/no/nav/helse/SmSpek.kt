@@ -68,10 +68,8 @@ object SmSpek : Spek({
             val sentMessage = inputMessage
             inputQueue.send(session.createTextMessage(sentMessage))
 
-            /* TODO fjern etter prodsetting
             eiaQueue.receive(10000).text() shouldEqual sentMessage
             syfomottakQueue.receive(100) shouldEqual null
-             */
         }
 
         it("Message with an valid fnr from 1999 should end up at the syfomottak input") {
