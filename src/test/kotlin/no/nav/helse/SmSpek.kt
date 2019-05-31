@@ -72,22 +72,18 @@ object SmSpek : Spek({
             syfomottakQueue.receive(100) shouldEqual null
         }
 
-        it("Message with an valid fnr from 1999 should end up at the syfomottak input") {
-            val sentMessage = inputMessage.replace("{{FNR}}", "12349912345")
+        it("Message with an valid fnr from 1998 should end up at the syfomottak input") {
+            val sentMessage = inputMessage.replace("{{FNR}}", "12349812345")
             inputQueue.send(session.createTextMessage(sentMessage))
-            /* TODO fjern etter prodsetting
             syfomottakQueue.receive(10000).text() shouldEqual sentMessage
             eiaQueue.receive(100) shouldEqual null
-             */
         }
 
         it("Invalid XML should be routed to EIA input queue") {
             val sentMessage = "HELLOTHISISNOTXML"
             inputQueue.send(session.createTextMessage(sentMessage))
-            /* TODO fjern etter prodsetting
             eiaQueue.receive(10000).text() shouldEqual sentMessage
             syfomottakQueue.receive(100) shouldEqual null
-             */
         }
     }
 })
