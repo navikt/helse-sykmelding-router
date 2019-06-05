@@ -34,7 +34,8 @@ spec:
     requests:
       cpu: 50m
       memory: 128Mi
-  secrets: true
+  vault:
+    enabled: true
   ingress:
     disabled: false
   env:
