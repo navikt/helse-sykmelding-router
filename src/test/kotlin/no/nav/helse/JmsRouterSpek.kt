@@ -10,6 +10,7 @@ import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.nio.file.Paths
+import java.util.*
 import java.util.concurrent.Executors
 import javax.jms.*
 import kotlin.random.Random
@@ -137,9 +138,9 @@ object JmsRouterSpek : Spek({
             messages.count { it == testString3 } shouldEqual 1
         }
 
-        it("Has sufficient performance") {
+        it("Has sufficient performance", timeout = 60000) {
             val messages = (0..20200).map {
-                Random.nextBytes(Random.nextInt(4192, 16384)).toString(Charsets.ISO_8859_1)
+                Random.nextBytes(1024).toString(Charsets.ISO_8859_1)
             }
 
             val messagesWarmup = messages.take(200)

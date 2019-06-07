@@ -4,17 +4,27 @@ import com.ibm.msg.client.jms.JmsConstants
 import com.ibm.msg.client.jms.JmsFactoryFactory
 import com.ibm.msg.client.wmq.WMQConstants
 import io.ktor.application.call
-import io.ktor.http.ContentType
+import io.ktor.application.install
 import io.ktor.http.HttpStatusCode
+import io.ktor.metrics.micrometer.MicrometerMetrics
 import io.ktor.response.respondText
-import io.ktor.response.respondTextWriter
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.micrometer.core.instrument.Clock
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
+import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.Summary
-import io.prometheus.client.exporter.common.TextFormat
 import kotlinx.coroutines.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
@@ -110,7 +120,7 @@ data class ApplicationState(var running: Boolean = true, var ready: Boolean = fa
 
 @ImplicitReflectionSerializer
 inline fun <reified T : Any> readConfig(path: Path): T = Json.parse(Files.readAllBytes(path).toString(Charsets.UTF_8))
-private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+val meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT, CollectorRegistry.defaultRegistry, Clock.SYSTEM)
 val coroutineContext = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
 val coroutineScope = CoroutineScope(coroutineContext)
 
@@ -209,7 +219,7 @@ suspend fun routeMessages(
                         }
                     XPathResult(extraValuePairs, producerMeta)
                 } catch (e: Exception) {
-                    log.error("Caught exception while trying to match with xpath and regex")
+                    log.error("Caught exception while trying to match with xpath and regex", e)
                     XPathResult(route.log.map { keyValue(it.key, "missing") }.toTypedArray(), listOf())
                 }
                 log.info("Received message from {}, routing to {}",
@@ -254,6 +264,13 @@ suspend fun ProducerMeta.send(
 ) {
     try {
         producer.send(message)
+            Counter.builder("message_counter")
+            .tags(listOf(
+                Tag.of("input_queue", inputQueueName),
+                Tag.of("output_queue", queueInfo.name)
+            ))
+            .register(meterRegistry)
+            .increment()
     } catch (e: Throwable) {
         if (queueInfo.failOnException) {
             log.error("Failed to route message from {} to {}, rolling back transaction $extraValuePairFormat",
@@ -276,6 +293,18 @@ suspend fun ProducerMeta.send(
 fun Destination.name(): String = if (this is Queue) { queueName } else { toString() }
 
 suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServer(CIO, 8080) {
+    install(MicrometerMetrics) {
+        registry = meterRegistry
+
+        meterBinders = listOf(
+            ClassLoaderMetrics(),
+            FileDescriptorMetrics(),
+            JvmGcMetrics(),
+            JvmMemoryMetrics(),
+            JvmThreadMetrics(),
+            ProcessorMetrics()
+        )
+    }
     routing {
         get("/is_alive") {
             if (applicationState.running) {
@@ -292,10 +321,7 @@ suspend fun createHttpServer(applicationState: ApplicationState) = embeddedServe
             }
         }
         get("/prometheus") {
-            val names = call.request.queryParameters.getAll("name[]")?.toSet() ?: setOf()
-            call.respondTextWriter(ContentType.parse(TextFormat.CONTENT_TYPE_004)) {
-                TextFormat.write004(this, collectorRegistry.filteredMetricFamilySamples(names))
-            }
+            call.respondText(meterRegistry.scrape())
         }
     }
 }.start(wait = false)
