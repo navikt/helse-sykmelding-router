@@ -1,12 +1,12 @@
 apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+kind: Application
 metadata:
-  name: "helse-sykmelding-router"
-  namespace: "default"
+  name: helse-sykmelding-router
+  namespace: default
   labels:
     team: "teamsykefravr"
 spec:
-  image: "repo.adeo.no:5443/helse/helse-sykmelding-router:@@VERSION@@"
+  image: "repo.adeo.no:5443/syfo/helse-sykmelding-router:@@VERSION@@"
   team: teamsykefravr
   replicas:
     min: 1
