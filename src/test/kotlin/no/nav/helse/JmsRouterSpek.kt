@@ -138,14 +138,14 @@ object JmsRouterSpek : Spek({
             messages.count { it == testString3 } shouldEqual 1
         }
 
-        it("Has sufficient performance", timeout = 60000) {
+        it("Has sufficient performance", timeout = 90000) {
             val messages = (0..20200).map {
                 Random.nextBytes(1024).toString(Charsets.ISO_8859_1)
             }
 
             val messagesWarmup = messages.take(200)
-            val messagesRoute1 = messages.take(4000)
-            val messagesRoute2 = messages.take(4000)
+            val messagesRoute1 = messages.take(3000)
+            val messagesRoute2 = messages.take(3000)
 
             messagesWarmup.forEach { route1Producer.send(session.createTextMessage(it)) }
             route1Consumers.forEach { c -> repeat(400) { c.receiveWaitOnNull(5) } }
@@ -165,10 +165,10 @@ object JmsRouterSpek : Spek({
 
             messagesRoute1.count { input ->
                 resultsRoute1.count { output -> input == output } >= 3
-            } shouldEqual 4000
+            } shouldEqual 3000
             messagesRoute2.count { input ->
                 resultsRoute2.count { output -> input == output } >= 1
-            } shouldEqual 4000
+            } shouldEqual 3000
         }
     }
 
