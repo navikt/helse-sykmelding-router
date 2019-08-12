@@ -2,6 +2,12 @@ version: 2.1
 orbs:
   barkendeploy: navikt/barkendeploy@dev:master
   slack: circleci/slack@3.2.0
+
+parameters:
+  deploy_branch:
+    type: boolean
+    default: false
+
 jobs:
   build_jar:
     docker:
@@ -12,16 +18,28 @@ jobs:
       - barkendeploy/init
       - barkendeploy/gradle-cache-restore
       - run:
-          name: Run tests
-          command: ./gradlew test
-      - run:
           name: Build jar file
           command: ./gradlew shadowJar -x test
+      - run:
+          name: Run tests
+          command: ./gradlew test
+      - barkendeploy/skip-on-env-var:
+          env_var: '"<< pipeline.parameters.deploy_branch >>"'
       - barkendeploy/gradle-cache-persist
       - barkendeploy/docker-build
       - barkendeploy/docker-login
       - barkendeploy/docker-push
-
+  run_tests:
+    docker:
+      - image: "circleci/openjdk:11-jdk"
+    steps:
+      - checkout
+      - setup_remote_docker
+      - barkendeploy/init
+      - barkendeploy/gradle-cache-restore
+      - run:
+          name: Run tests
+          command: ./gradlew test
 workflows:
   version: 2
   build_and_deploy:
@@ -40,28 +58,25 @@ workflows:
           context: barkendeploy
           requires:
             - build_jar
+  test_branch:
+    unless: << pipeline.parameters.deploy_branch >>
+    jobs:
+      - run_tests:
+          filters:
+            branches:
+              ignore: master
   build_branch:
+    when: << pipeline.parameters.deploy_branch >>
     jobs:
       - build_jar:
           context: barkendeploy
           filters:
             branches:
               ignore: master
-      - slack/approval-notification:
-          context: barkendeploy
-          name: deploy_branch
-          mentions: here
-          message: Repoet ${CIRCLE_PROJECT_REPONAME} trenger godkjennelse for å deploye branchen ${CIRCLE_BRANCH} til dev-fss
-          requires:
-            - build_jar
-      - await_approval_branch:
-          type: approval
-          requires:
-            - build_jar
       - barkendeploy/deployment:
-          context: barkendeploy
           deployments:
             - barkendeploy/deploy-create:
                 cluster: dev-fss
+          context: barkendeploy
           requires:
-            - await_approval_branch
+            - build_jar

@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val artemisVersion = "2.6.2"
 val ibmMqVersion = "9.1.2.0"
-val ktorVersion = "1.2.0"
+val ktorVersion = "1.2.3"
 val logbackVersion = "1.3.0-alpha4"
 val logstashLogbackEncoderVersion = "6.0"
 val micrometerVersion = "1.1.4"
