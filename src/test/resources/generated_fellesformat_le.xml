@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EI_fellesformat xmlns="http://www.trygdeetaten.no/xml/eiff/1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <MsgHead xmlns="http://www.kith.no/xmlstds/msghead/2006-05-24" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:n1="http://www.altova.com/samplexml/other-namespace">
+        <MsgInfo>
+            <Type DN="LegerklÃ&#x192;ÃÂ¿ring ved arbeidsufÃ&#x192;ÃÂ¿rhet" V="LEGEERKL" />
+            <MIGversion>v1.2 2006-05-24</MIGversion>
+            <GenDate>2018-02-04T10:51:03Z</GenDate>
+            <MsgId>7bd03149-45ac-4011-9137-a153310df560</MsgId>
+            <Sender>
+                <Organisation>
+                    <OrganisationName>Hanadalen Legesenter</OrganisationName>
+                    <TypeOrganisation V="" />
+                    <Ident>
+                        <Id>895882992</Id>
+                        <TypeId DN="Organisasjonsnummeret i Enhetsregister(ENH-id)" S="2.16.578.1.12.4.1.1.9051" V="ENH" />
+                    </Ident>
+                    <Address>
+                        <StreetAdr>Sannergata 2</StreetAdr>
+                        <PostalCode>4327</PostalCode>
+                        <City>SANDNES</City>
+                    </Address>
+                    <HealthcareProfessional>
+                        <FamilyName>Per</FamilyName>
+                        <GivenName>Hansen</GivenName>
+                        <Ident>
+                            <Id>123124324234</Id>
+                            <TypeId DN="FÃ&#x192;ÃÂ¿dselsnummer" S="2.16.578.1.12.4.1.1.8116" V="FNR" />
+                        </Ident>
+                    </HealthcareProfessional>
+                </Organisation>
+            </Sender>
+            <Receiver>
+                <Organisation>
+                    <OrganisationName>NAV</OrganisationName>
+                    <Ident>
+                        <Id>79768</Id>
+                        <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" S="2.16.578.1.12.4.1.1.8116.9051" V="HER" />
+                    </Ident>
+                </Organisation>
+            </Receiver>
+        </MsgInfo>
+        <Document>
+            <RefDoc>
+                <MsgType DN="XML-instans" V="XML" />
+                <Content>
+                    <Legeerklaring xmlns="http://www.kith.no/xmlstds/legeerklaring/2008-06-06" xmlns:xsd="http://www.w3.org/2001/XMLSchema.xsd">
+                        <LegeerklaringGjelder typeLegeerklaring="1" />
+                        <LegeerklaringGjelder typeLegeerklaring="4" />
+                        <Pasientopplysninger flereArbeidsforhold="2">
+                            <Pasient fodselsnummer="{{FNR}}" trygdekontor="NAV Sandnes trygd">
+                                <Navn>
+                                    <Etternavn>Baltzersen</Etternavn>
+                                    <Fornavn>Birgitte LE sdfsdfs</Fornavn>
+                                </Navn>
+                                <Arbeidsforhold primartArbeidsforhold="1">
+                                    <Virksomhet virksomhetsBetegnelse="Avinor">
+                                        <VirksomhetsAdr adressetype="RES">
+                                            <PostalAddress>
+                                                <StreetAddress />
+                                                <PostalCode />
+                                                <City />
+                                            </PostalAddress>
+                                        </VirksomhetsAdr>
+                                    </Virksomhet>
+                                    <Yrkesbetegnelse>Flygeleder</Yrkesbetegnelse>
+                                </Arbeidsforhold>
+                                <PersonAdr adressetype="H">
+                                    <PostalAddress>
+                                        <StreetAddress>Myklabergveien 8</StreetAddress>
+                                        <PostalCode>4314</PostalCode>
+                                        <City>SANDNES</City>
+                                        <Country>no</Country>
+                                    </PostalAddress>
+                                </PersonAdr>
+                            </Pasient>
+                        </Pasientopplysninger>
+                        <PlanUtredBehandle>
+                            <HenvistBehandling henvistDato="2016-11-02" antattVentetid="2">
+                                <Spesifikasjon>EKG</Spesifikasjon>
+                            </HenvistBehandling>
+                            <NyeLegeopplysninger>16</NyeLegeopplysninger>
+                            <IkkeVidereBehandling>Vet ikke asdasd</IkkeVidereBehandling>
+                            <BehandlingsPlan>Mosjon</BehandlingsPlan>
+                            <UtredningsPlan>ekg fordsfsfstt</UtredningsPlan>
+                        </PlanUtredBehandle>
+                        <DiagnoseArbeidsuforhet arbeidsuforFra="2016-06-07">
+                            <DiagnoseKodesystem kodesystem="5">
+                                <Enkeltdiagnose diagnose="Hjerte" kodeverdi="K01" sortering="0" />
+                            </DiagnoseKodesystem>
+                            <VurderingYrkesskade borVurderes="2" />
+                            <StatusPresens>16.10.29:</StatusPresens>
+                            <SymptomerBehandling>Vondt i hjertet sitt idfdfffkkje bra</SymptomerBehandling>
+                        </DiagnoseArbeidsuforhet>
+                        <ForslagTiltak tiltak="1">
+                            <AktueltTiltak typeTiltak="7">
+                                <HvilkeAndreTiltak>Trening 2423424 arbeidstid</HvilkeAndreTiltak>
+                            </AktueltTiltak>
+                            <Opplysninger />
+                            <BegrensningerTiltak>Trene sdfsdfsdfsfsf;asdsfsfsdadadasdasd</BegrensningerTiltak>
+                        </ForslagTiltak>
+                        <VurderingFunksjonsevne>
+                            <Arbeidssituasjon arbeidssituasjon="1" />
+                            <VurderingArbeidsevne gjenopptaArbeid="1" narGjenopptaArbeid="1" taAnnetArbeid="1" narTaAnnetArbeid="1">
+                                <IkkeGjore>trenene i arbeidstid trene i arbeidstid</IkkeGjore>
+                            </VurderingArbeidsevne>
+                            <Funksjonsevne>trene trene trene moderat</Funksjonsevne>
+                            <KravArbeid>Flygeleder sas</KravArbeid>
+                        </VurderingFunksjonsevne>
+                        <Prognose bedreArbeidsevne="1">
+                            <AntattVarighet>inntil videre</AntattVarighet>
+                            <VarighetFunksjonsnedsettelse>intill videre</VarighetFunksjonsnedsettelse>
+                            <VarighetNedsattArbeidsevne>Varig</VarighetNedsattArbeidsevne>
+                        </Prognose>
+                        <ArsakssammenhengLegeerklaring>Betydelig sammenheng.</ArsakssammenhengLegeerklaring>
+                        <ForbeholdLegeerklaring tilbakeholdInnhold="2" />
+                    </Legeerklaring>
+                </Content>
+            </RefDoc>
+        </Document>
+        <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+            <SignedInfo>
+                <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+                <Reference URI="">
+                    <Transforms>
+                        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                    </Transforms>
+                    <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                    <DigestValue>QlR2pL73ef1VBxa0jRN3ECV6oi+RDGPP+8vETLlKjjU=</DigestValue>
+                </Reference>
+            </SignedInfo>
+            <SignatureValue>fdgljndfsgnjlljnfdgljndfgljnølnjcblvnxjnjlcbnjknjkbdfxnkjxcfkjnjdfnbluiseajdsjf</SignatureValue>
+            <KeyInfo>
+                <X509Data>
+                    <X509Certificate>tersjndgfnjknjkdfgnjkdfgkndfsgnjkldfgkjndgfknjnjkfdgnm,m ,xvm,fjvcxjknjnkcvxjncvxjnxcvjkncxvjnkjkncvxjkfdgjkdfgjknjn</X509Certificate>
+                </X509Data>
+            </KeyInfo>
+        </Signature>
+    </MsgHead>
+    <MottakenhetBlokk avsender="2134125125" avsenderFnrFraDigSignatur="300631044141" avsenderRef="SERIALNUMBER=2134125125, CN=TEST-Flott, OU=R&amp;D, O=Flott AS, C=NO" ebAction="Registrering" ebRole="Sykmelder" ebService="Sykmelding" ebXMLSamtaleId="deb6d7d1-139c-4885-aa22-b9362de06205" ediLoggId="1807311226joakim51343.1" herIdentifikator="" meldingsType="xml" mottattDatotid="2018-07-31T12:26:26" partnerReferanse="16524" />
+</EI_fellesformat>

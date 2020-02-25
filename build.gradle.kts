@@ -6,18 +6,18 @@ val ktorVersion = "1.2.3"
 val logbackVersion = "1.3.0-alpha4"
 val logstashLogbackEncoderVersion = "6.0"
 val micrometerVersion = "1.1.4"
-val spekVersion = "2.0.5"
+val spekVersion = "2.0.9"
 val prometheusVersion = "0.6.0"
 val serializationVersion = "0.11.0"
 
 plugins {
-    kotlin("jvm") version "1.3.31"
-    id("kotlinx-serialization") version "1.3.31"
+    kotlin("jvm") version "1.3.61"
+    id("kotlinx-serialization") version "1.3.61"
     id("com.github.johnrengelman.shadow") version "5.0.0"
 }
 
 group = "no.nav.helse"
-version = "1.1.3"
+version = "1.0.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.helse.JmsRouterKt"
@@ -73,7 +73,7 @@ tasks.withType<Test> {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 tasks.create("printVersion") {
