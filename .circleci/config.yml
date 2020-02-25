@@ -51,10 +51,10 @@ workflows:
               only: master
       - barkendeploy/deployment:
           deployments:
-            # - barkendeploy/deploy-create:
-            #   cluster: dev-fss
             - barkendeploy/deploy-create:
-                cluster: prod-fss
+                cluster: dev-fss
+            #- barkendeploy/deploy-create:
+            #    cluster: prod-fss
           context: barkendeploy
           requires:
             - build_jar
