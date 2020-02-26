@@ -20,7 +20,7 @@ import javax.xml.xpath.XPathFactory
 
 @ImplicitReflectionSerializer
 object SmSpek : Spek({
-    val inputMessage = getFileAsString("src/test/resources/generated_fellesformat_le.xml")
+    val inputMessage = getFileAsStringUTF8("src/test/resources/generated_fellesformat_le.xml")
 
     val activeMQServer = ActiveMQServers.newActiveMQServer(
         ConfigurationImpl()
@@ -73,9 +73,9 @@ object SmSpek : Spek({
 
 
         it("Message with an valid fnr from 1998 should end up at the pale2 input") {
-            val sentMessage = inputMessage.replace("{{FNR}}", "12349812345")
-            inputQueue.send(session.createTextMessage(sentMessage))
-            pale2Queue.receive(10000).text() shouldEqual sentMessage
+            val sentMessage1998 = getFileAsStringISO88591("src/test/resources/generated_fellesformat_le_fnr_1998.xml")
+            inputQueue.send(session.createTextMessage(sentMessage1998))
+            pale2Queue.receive(10000).text() shouldEqual sentMessage1998
             eiaQueue.receive(100) shouldEqual null
         }
 

@@ -10,7 +10,7 @@
         { "name": "QA.Q1_PALE_2.TEMP_ROUTED_INPUT", "failOnException": true,
           "behavior": "MATCH",
           "matcher": {
-            "extractor": "/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/Legeerklaring/Pasient[@Fodselsnummer]",
+            "extractor": "/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/Legeerklaring/Pasientopplysninger/Pasient/@fodselsnummer",
             "pattern": "\\d{4}(98|0[0-9])\\d{5}"
           }
         },
