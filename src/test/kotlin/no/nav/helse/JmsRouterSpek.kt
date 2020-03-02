@@ -137,9 +137,9 @@ object JmsRouterSpek : Spek({
             messages.count { it == testString3 } shouldEqual 1
         }
 
-        it("Has sufficient performance", timeout = 120000) {
+        it("Has sufficient performance", timeout = 150000) {
             val messages = (0..20200).map {
-                Random.nextBytes(1024).toString(Charsets.ISO_8859_1)
+                Random.nextBytes(512).toString(Charsets.ISO_8859_1)
             }
 
             val messagesWarmup = messages.take(100)
