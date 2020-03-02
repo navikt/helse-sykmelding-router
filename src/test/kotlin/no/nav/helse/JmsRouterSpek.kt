@@ -10,7 +10,6 @@ import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.nio.file.Paths
-import java.util.*
 import java.util.concurrent.Executors
 import javax.jms.*
 import kotlin.random.Random
@@ -143,12 +142,12 @@ object JmsRouterSpek : Spek({
                 Random.nextBytes(1024).toString(Charsets.ISO_8859_1)
             }
 
-            val messagesWarmup = messages.take(200)
-            val messagesRoute1 = messages.take(1000)
-            val messagesRoute2 = messages.take(1000)
+            val messagesWarmup = messages.take(100)
+            val messagesRoute1 = messages.take(500)
+            val messagesRoute2 = messages.take(500)
 
             messagesWarmup.forEach { route1Producer.send(session.createTextMessage(it)) }
-            route1Consumers.forEach { c -> repeat(400) { c.receiveWaitOnNull(5) } }
+            route1Consumers.forEach { c -> repeat(200) { c.receiveWaitOnNull(5) } }
 
             println("Starting real run")
             val startTime = System.currentTimeMillis()
@@ -165,10 +164,10 @@ object JmsRouterSpek : Spek({
 
             messagesRoute1.count { input ->
                 resultsRoute1.count { output -> input == output } >= 3
-            } shouldEqual 1000
+            } shouldEqual 500
             messagesRoute2.count { input ->
                 resultsRoute2.count { output -> input == output } >= 1
-            } shouldEqual 1000
+            } shouldEqual 500
         }
     }
 
