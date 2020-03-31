@@ -11,7 +11,7 @@
           "behavior": "MATCH",
           "matcher": {
             "extractor": "/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/Legeerklaring/Pasientopplysninger/Pasient/@fodselsnummer",
-            "pattern": "\\d{4}(98|0[0-9])\\d{5}DISABLE"
+            "pattern": "\\d{4}(98|0[0-9])\\d{5}"
           }
         },
         {
