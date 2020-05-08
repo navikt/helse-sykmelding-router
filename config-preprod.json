@@ -5,12 +5,12 @@
   "mqChannel": "Q1_SYFOSMMOTTAK",
   "routes": [
     {
-      "inputQueue": "QA.Q1_PALE.INPUT",
+      "inputQueue": "QA.Q1_PADM.INPUT",
       "outputQueues": [
-        { "name": "QA.Q1_PALE_2.TEMP_ROUTED_INPUT", "failOnException": true,
+        { "name": "QA.Q1_PADM.TEMP_ROUTED_INPUT", "failOnException": true,
           "behavior": "MATCH",
           "matcher": {
-            "extractor": "/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/Legeerklaring/Pasientopplysninger/Pasient/@fodselsnummer",
+            "extractor": "/EI_fellesformat/MsgHead/MsgInfo/Patient/Ident[0]/id",
             "pattern": "\\d{4}((0|[3-9])[0-9])\\d{5}"
           }
         },

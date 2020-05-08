@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<EI_fellesformat xmlns="http://www.nav.no/xml/eiff/2/"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <MsgHead xmlns="http://www.kith.no/xmlstds/msghead/2006-05-24">
+        <MsgInfo>
+            <Type DN="Notat" V="DIALOG_NOTAT" />
+            <MIGversion>v1.2 2006-05-24</MIGversion>
+            <GenDate>2019-01-16T22:51:35.5317672+01:00</GenDate>
+            <MsgId>37340D30-FE14-42B5-985F-A8FF8FFA0CB5</MsgId>
+            <Ack DN="Ja" V="J" />
+            <Sender>
+                <Organisation>
+                    <OrganisationName>Kule helsetjenester AS</OrganisationName>
+                    <Ident>
+                        <Id>223456789</Id>
+                        <TypeId DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)" S="1.16.578.1.12.3.1.1.9051" V="ENH" />
+                    </Ident>
+                    <Ident>
+                        <Id>0123</Id>
+                        <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" V="HER" S="1.23.456.7.89.1.2.3.4567.8912" />
+                    </Ident>
+                    <Address>
+                        <StreetAdr>Oppdiktet gate 203</StreetAdr>
+                        <PostalCode>1234</PostalCode>
+                        <City>Oslo</City>
+                    </Address>
+                    <Organisation/>
+                    <HealthcareProfessional>
+                        <FamilyName>Valda</FamilyName>
+                        <MiddleName>Fos</MiddleName>
+                        <GivenName>Inga</GivenName>
+                        <Ident>
+                            <Id>1234</Id>
+                            <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret" S="1.16.578.1.12.4.3.1.8116" V="HER" />
+                        </Ident>
+                        <Ident>
+                            <Id>1234567</Id>
+                            <TypeId DN="HPR-nummer" S="1.16.578.1.12.3.1.1.8116" V="HPR" />
+                        </Ident>
+                        <Ident>
+                            <Id>04030350265</Id>
+                            <TypeId DN="Fødselsnummer" V="FNR" S="6.87.654.3.21.9.8.7.6543.2198" />
+                        </Ident>
+                        <Ident>
+                            <Id>45069800525</Id>
+                            <TypeId DN="D-nummer" V="DNR" S="6.16.578.1.12.4.1.4.8116" />
+                        </Ident>
+                        <Address>
+                            <StreetAdr>Oppdiktet gate 9001</StreetAdr>
+                            <PostalCode>9998</PostalCode>
+                            <City>Oppdiktet</City>
+                        </Address>
+                        <TeleCom>
+                            <TeleAddress V="98765432" />
+                            <TypeTelecom DN="Hovedtelefon" />
+                        </TeleCom>
+                    </HealthcareProfessional>
+                </Organisation>
+            </Sender>
+            <Receiver>
+                <Organisation>
+                    <OrganisationName>NAV</OrganisationName>
+                    <Ident>
+                        <Id>889640782</Id>
+                        <TypeId DN="Organisasjonsnummeret i Enhetsregister (Brønnøysund)" S="2.16.578.1.12.4.1.1.9051" V="ENH" />
+                    </Ident>
+                    <Ident>
+                        <Id>79768</Id>
+                        <TypeId DN="Identifikator fra Helsetjenesteenhetsregisteret (HER-id)" S="2.16.578.1.12.4.1.1.9051" V="HER" />
+                    </Ident>
+                </Organisation>
+            </Receiver>
+            <Patient>
+                <FamilyName>Test</FamilyName>
+                <GivenName>Etternavn</GivenName>
+                <DateOfBirth>1991-12-4</DateOfBirth>
+                <Sex DN="Mann" V="1" />
+                <Ident>
+                    <Id>3143242342</Id>
+                    <TypeId DN="Fødselsnummer" S="2.16.578.1.12.4.1.1.8116" V="FNR" />
+                </Ident>
+                <Address>
+                    <Type DN="Postadresse" V="PST" />
+                    <StreetAdr>Sannergata 2</StreetAdr>
+                    <PostalCode>0655</PostalCode>
+                    <City>OSLO</City>
+                    <County DN="OSLO" V="0712" />
+                </Address>
+            </Patient>
+        </MsgInfo>
+        <Document>
+            <RefDoc>
+                <IssueDate V="2019-01-16T21:57:36" />
+                <MsgType DN="XML-instans" V="XML" />
+                <Content>
+                    <Dialogmelding xmlns="http://www.kith.no/xmlstds/dialog/2006-10-11"
+                                   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <Notat>
+                            <TemaKodet DN="Henvendelse om sykefraværsoppfølging" S="2.16.578.1.12.4.1.1.8128" V="1" />
+                            <TekstNotatInnhold xsi:type="xsd:string">Hei,Det gjelder pas. Sender som vedlegg epikrisen</TekstNotatInnhold>
+                            <DokIdNotat>A1578B81-0042-453B-8527-6CF182BDA6C7</DokIdNotat>
+                            <DatoNotat>2019-01-16</DatoNotat>
+                        </Notat>
+                    </Dialogmelding>
+                </Content>
+            </RefDoc>
+        </Document>
+    </MsgHead>
+    <MottakenhetBlokk avsender="12312341" avsenderFnrFraDigSignatur="1231124124" avsenderRef="SERIALNUMBER=996871045, CN=LEGEHUSET NOVA DA, O=LEGEHUSET NOVA DA, C=NO" ebAction="Henvendelse" ebRole="Sykmelder" ebService="HenvendelseFraLege" ebXMLSamtaleId="615356d4-f5e6-4138-a868-bbb63bd6195d" ediLoggId="1901162157lege21826.1" herIdentifikator="" meldingsType="xml" mottattDatotid="2019-01-16T21:57:43" partnerReferanse="13123" />
+</EI_fellesformat>

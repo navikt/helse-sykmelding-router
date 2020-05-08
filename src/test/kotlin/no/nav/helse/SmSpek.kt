@@ -20,7 +20,7 @@ import javax.xml.xpath.XPathFactory
 
 @ImplicitReflectionSerializer
 object SmSpek : Spek({
-    val inputMessage = getFileAsStringUTF8("src/test/resources/generated_fellesformat_le.xml")
+    val inputMessage = getFileAsStringUTF8("src/test/resources/dialogmelding_dialog_notat.xml")
 
     val activeMQServer = ActiveMQServers.newActiveMQServer(
         ConfigurationImpl()
@@ -43,7 +43,7 @@ object SmSpek : Spek({
     val config = readConfig<Config>(Paths.get("config-preprod.json"))
 
     val inputQueue = session.createProducer(session.createQueue(config.routes[0].inputQueue))
-    val pale2Queue = session.createConsumer(session.createQueue(config.routes[0].outputQueues[0].name))
+    val padmQueue = session.createConsumer(session.createQueue(config.routes[0].outputQueues[0].name))
     val eiaQueue = session.createConsumer(session.createQueue(config.routes[0].outputQueues[1].name))
 
     afterGroup {
@@ -68,14 +68,14 @@ object SmSpek : Spek({
             inputQueue.send(session.createTextMessage(sentMessage))
 
             eiaQueue.receive(10000).text() shouldEqual sentMessage
-            pale2Queue.receive(100) shouldEqual null
+            padmQueue.receive(100) shouldEqual null
         }
 
 
         it("Message with an valid fnr from 1998 should end up at the pale2 input") {
             val sentMessage1998 = getFileAsStringISO88591("src/test/resources/generated_fellesformat_le_fnr_1998.xml")
             inputQueue.send(session.createTextMessage(sentMessage1998))
-            pale2Queue.receive(10000).text() shouldEqual sentMessage1998
+            padmQueue.receive(10000).text() shouldEqual sentMessage1998
             eiaQueue.receive(100) shouldEqual null
         }
 
@@ -83,7 +83,7 @@ object SmSpek : Spek({
             val sentMessage = "HELLOTHISISNOTXML"
             inputQueue.send(session.createTextMessage(sentMessage))
             eiaQueue.receive(10000).text() shouldEqual sentMessage
-            pale2Queue.receive(100) shouldEqual null
+            padmQueue.receive(100) shouldEqual null
         }
     }
 })
@@ -94,8 +94,8 @@ fun Message.text(): String? = when (this) {
 }
 
 fun main() {
-    val xpath = XPathFactory.newInstance().newXPath().compile("/EI_fellesformat/MsgHead/Document/RefDoc/Content[1]/Legeerklaring/Pasient/Fodselsnummer")
-    val document = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder().parse(File("src/test/resources/generated_fellesformat_le.xml"))
+    val xpath = XPathFactory.newInstance().newXPath().compile("/EI_fellesformat/MsgHead/MsgInfo/Patient/Ident[0]/id")
+    val document = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder().parse(File("src/test/resources/dialogmelding_dialog_notat.xml"))
     val value = xpath.evaluate(document)
     println(value)
 }
