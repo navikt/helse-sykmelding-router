@@ -1,3 +1,5 @@
+# No longer in use, no need to route sykmeldinger to old application EIA.
+
 # Helse sykmelding router
 This is a application for routing a message from one to multiple queues
 
